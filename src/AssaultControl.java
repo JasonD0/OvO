@@ -13,10 +13,14 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
     private AssaultView av;
     private AssaultModel am;
     private Timer gameTimer;
+    private Player p;
+    private Enemy e;
 
     public AssaultControl() {
         this.av = new AssaultView();
         this.am = new AssaultModel();
+        this.p = new Player(100, am.PLATFORM_Y - 25, 25, 25, 0,0, 100, Color.BLACK);
+        this.e = new Enemy(1300, am.PLATFORM_Y - 50, 50, 50, 0, 0, 100, Color.WHITE);
         init();
     }
 
@@ -66,8 +70,9 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        //g.setColor(Color.BLACK);
-        //g.fillRect(am.GAME_LENGTH, am.PLATFORM_Y, 100, 100);
+        av.drawPlatform(g, am.AQUA, am.PLATFORM_Y, am.GAME_LENGTH, 20);
+        av.drawEntity(g, p);
+        av.drawEntity(g, e);
     }
 
     @Override
