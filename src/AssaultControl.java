@@ -15,12 +15,14 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
     private Timer gameTimer;
     private Player p;
     private Enemy e;
+    private PlayerControl pc;
 
     public AssaultControl() {
         this.av = new AssaultView();
         this.am = new AssaultModel();
         this.p = new Player(100, am.PLATFORM_Y - 25, 25, 25, 0,0, 100, Color.BLACK);
         this.e = new Enemy(1300, am.PLATFORM_Y - 50, 50, 50, 0, 0, 100, Color.WHITE);
+        this.pc = new PlayerControl(am, av, p);
         init();
     }
 
@@ -57,7 +59,7 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
             @Override
             public void actionPerformed(ActionEvent e) {
                 am.updateCounter();
-                System.out.println(am.getTime());
+                //System.out.println(am.getTime());
             }
         });
         gameTimer.start();
@@ -65,6 +67,7 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
 
     private void actionPerformed() {
         requestFocusInWindow();
+        pc.move();
     }
 
     @Override
@@ -76,18 +79,13 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
     }
 
     @Override
-    public void keyTyped(KeyEvent e) {
-
-    }
-
-    @Override
     public void keyPressed(KeyEvent e) {
-
+        pc.keyPressed(e);
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
-
+        pc.keyReleased(e);
     }
 
     /**
@@ -103,6 +101,8 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
         while (running) {
             long now = System.nanoTime();
             delta += (now - lastTime)/updateInterval;
+            lastTime = now;
+
             if (delta >= 1) {
                 actionPerformed();
                 delta--;
@@ -111,11 +111,14 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
 
             try {
                 if ((lastTime - System.nanoTime() + updateInterval)/1000000 < 0) continue;
-                Thread.sleep(8 /*(long)(lastTime - System.nanoTime() + updateInterval)/1000000*/);
+                Thread.sleep(8);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
         stop();
     }
+
+    @Override
+    public void keyTyped(KeyEvent e) {}
 }
