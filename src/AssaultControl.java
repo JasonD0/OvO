@@ -1,9 +1,12 @@
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
@@ -15,6 +18,7 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
     private Timer gameTimer;
     private Player p;
     private Enemy e;
+    private Attack playerAttack;
     private PlayerControl pc;
 
     public AssaultControl() {
@@ -22,7 +26,8 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
         this.am = new AssaultModel();
         this.p = new Player(100, am.PLATFORM_Y - 25, 25, 25, 0,0, 100, Color.BLACK);
         this.e = new Enemy(1300, am.PLATFORM_Y - 50, 50, 50, 0, 0, 100, Color.WHITE);
-        this.pc = new PlayerControl(am, av, p);
+        this.playerAttack = new Attack();
+        this.pc = new PlayerControl(am, av, p, playerAttack);
         init();
     }
 
@@ -50,6 +55,8 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
         addKeyListener(this);
         setFocusable(true);
         setVisible(true);
+        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        addPlatform();
         start();
         initGameTimer();
     }
@@ -65,6 +72,11 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
         gameTimer.start();
     }
 
+    private void addPlatform() {
+        add(Box.createRigidArea(new Dimension(0, am.PLATFORM_Y)));
+        av.drawPlatform(this, am.GAME_LENGTH, am.AQUA);
+    }
+
     private void actionPerformed() {
         requestFocusInWindow();
         pc.move();
@@ -73,9 +85,9 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        av.drawPlatform(g, am.AQUA, am.PLATFORM_Y, am.GAME_LENGTH, 20);
-        av.drawEntity(g, p);
-        av.drawEntity(g, e);
+        //av.drawPlatform(g, am.AQUA, am.PLATFORM_Y, am.GAME_LENGTH, 20);
+        av.drawEntity(g, p, playerAttack);
+        //av.drawEntity(g, e, playerAttack);
     }
 
     @Override

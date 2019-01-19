@@ -7,6 +7,7 @@ public class Entity {
     private int velX, velY;
     private int health;
     private int angle;
+    private boolean attacking;
     private Color c;
 
     public Entity(int x, int y, int h, int l, int velX, int velY, int health, Color c) {
@@ -18,6 +19,7 @@ public class Entity {
         this.velY = velY;
         this.health = health;
         this.angle = 0;
+        this.attacking = false;
         this.c = c;
     }
 
@@ -56,6 +58,14 @@ public class Entity {
     }
 
     public void setVelX(int velX) { this.velX = velX; }
+
+    public void setAttacking(boolean b) {
+        this.attacking = b;
+    }
+
+    public boolean isAttacking() {
+        return this.attacking;
+    }
 
     public int getHealth() {
         return this.health;
