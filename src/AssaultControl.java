@@ -93,7 +93,7 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
     @Override
     public void keyPressed(KeyEvent e) {
         if (am.isPaused()) return;
-        pc.keyPressed(e);
+        pc.keyPressed(e.getKeyCode());
     }
 
     @Override
@@ -105,7 +105,7 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
             else gameTimer.start();
 
         } else {
-            pc.keyReleased(e);
+            pc.keyReleased(e.getKeyCode());
         }
     }
 

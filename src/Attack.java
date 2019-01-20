@@ -42,22 +42,43 @@ public class Attack {
         return this.direction;
     }
 
+    /**
+     * Checks attack completed
+     * @return
+     */
     public boolean isCompleted() {
         return this.width >= END_W;
     }
 
+    /**
+     * Increase attack range
+     */
     public void increaseWidth() {
         this.width += 5;
     }
 
+    /**
+     * Gets the angular extent of the arc
+     * See Arc2D.Double javadoc
+     * @return
+     */
     public int getExtent() {
         return this.extent;
     }
 
+    /**
+     * Gets the starting angle of the attack arc
+     * See Arc2D.Double javadoc
+     * @return
+     */
     public int getStart() {
         return this.start;
     }
 
+    /**
+     * Changes angles for the attack direction to match the direction the player is facing
+     * @param direction
+     */
     public void changeAttackAngle(String direction) {
         this.direction = direction;
         switch (direction) {
