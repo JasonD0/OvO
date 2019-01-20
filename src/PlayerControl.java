@@ -20,7 +20,8 @@ public class PlayerControl {
     }
 
     private void initAttackTimer() {
-        this.attackCD = new Timer(1500, new ActionListener() {
+        // pressing X only registers every 0.45 seconds
+        this.attackCD = new Timer(450, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 attackCD.stop();
@@ -44,7 +45,7 @@ public class PlayerControl {
         preventMoveOutLeft();
         p.setYOrd(p.getYOrd() + p.getVelY());
         p.setXOrd(p.getXOrd() + p.getVelX());
-        attackControl.increaseWidth(p.isAttacking());
+        if (!attackControl.isCompleted()) attackControl.increaseWidth();
     }
 
     private void preventMoveAbove() {
@@ -73,16 +74,23 @@ public class PlayerControl {
     }
 
     public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-            p.setVelX(p.getMoveVel());
-            p.setDirection("E");
-            attackControl.changeAttackAngle("E");
-        }
+        if (attackControl.isCompleted()) {
+            if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+                p.setVelX(p.getMoveVel());
+                p.setDirection("E");
+                attackControl.changeAttackAngle("E");
+            }
 
-        if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-            p.setVelX(-p.getMoveVel());
-            p.setDirection("W");
-            attackControl.changeAttackAngle("W");
+            if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+                p.setVelX(-p.getMoveVel());
+                p.setDirection("W");
+                attackControl.changeAttackAngle("W");
+            }
+
+            if (e.getKeyCode() == KeyEvent.VK_UP) {
+                p.setDirection("N");
+                attackControl.changeAttackAngle("N");
+            }
         }
 
         if (e.getKeyCode() == KeyEvent.VK_Z && !p.isFalling()) {
@@ -90,8 +98,14 @@ public class PlayerControl {
             p.setFalling(false);
         }
 
-        if (e.getKeyCode() ==  KeyEvent.VK_X) {
-            p.setAttacking(true);
+        if (e.getKeyCode() == KeyEvent.VK_X && !attackCD.isRunning()) {
+            attackControl.resetWidth();
+            attackCD.restart();
+        }
+
+        if (e.getKeyCode() == KeyEvent.VK_C && !dashCD.isRunning()) {
+
+            dashCD.restart();
         }
     }
 
@@ -107,10 +121,6 @@ public class PlayerControl {
         if (e.getKeyCode() == KeyEvent.VK_Z) {
             p.setVelY(p.getMoveVel());
             p.setFalling(true);
-        }
-
-        if (e.getKeyCode() ==  KeyEvent.VK_X) {
-            p.setAttacking(false);
         }
     }
 }

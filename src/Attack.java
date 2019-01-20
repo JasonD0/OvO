@@ -1,42 +1,65 @@
 public class Attack {
-    private static int START_W = 70;
-    private static int END_W = 100;
-    private static int HEIGHT = 10;
-    private int angle;
+    private final static int START_W = 70;
+    private final static int END_W = 110;
+    private final static int HEIGHT = 10;
+    private int extent, start;
     private int width, height;
+    private String direction;
 
     public Attack() {
-        this.width = START_W;
         this.height = HEIGHT;
-        this.angle = -180;
+        this.extent = -180;
+        this.start = 90;
+        this.direction = "E";
     }
 
     public int getHeight() {
-        return this.height;
+        return (direction.compareTo("N") == 0) ? this.width : this.height;
     }
 
     public int getWidth() {
-        return this.width;
+        return (direction.compareTo("N") == 0) ? this.height : this.width;
     }
 
-    public int getAngle() {
-        return this.angle;
+    public void resetWidth() {
+        this.width = START_W;
     }
 
-    public int getStartW() {
-        return this.START_W;
+    public String getDirection() {
+        return this.direction;
     }
 
-    public void increaseWidth(boolean attacking) {
-        if (!attacking && this.width <= START_W) return;
-        this.width = (this.width > END_W) ? START_W : this.width + 5;
+    public boolean isCompleted() {
+        return this.width >= END_W;
+    }
+
+    public int getExtent() {
+        return this.extent;
+    }
+
+    public int getStart() {
+        return this.start;
+    }
+
+    public void increaseWidth() {
+        this.width += 5;
     }
 
     public void changeAttackAngle(String direction) {
-        if (direction.compareTo("E") == 0) {
-            this.angle = -180;
-        } else if (direction.compareTo("W") == 0) {
-            this.angle = 180;
+        this.direction = direction;
+        switch (direction) {
+            case "E":
+                this.extent = -180;
+                this.start = 90;
+                break;
+            case "W":
+                this.extent = 180;
+                this.start = 90;
+                break;
+            case "N":
+                this.extent = 180;
+                this.start = 0;
+                break;
         }
     }
 }

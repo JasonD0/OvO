@@ -78,6 +78,7 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
     }
 
     private void actionPerformed() {
+        if (am.isPaused()) return;
         requestFocusInWindow();
         pc.move();
     }
@@ -85,19 +86,27 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        //av.drawPlatform(g, am.AQUA, am.PLATFORM_Y, am.GAME_LENGTH, 20);
+        av.drawEntity(g, e, null);
         av.drawEntity(g, p, playerAttack);
-        //av.drawEntity(g, e, playerAttack);
     }
 
     @Override
     public void keyPressed(KeyEvent e) {
+        if (am.isPaused()) return;
         pc.keyPressed(e);
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
-        pc.keyReleased(e);
+        if (e.getKeyCode() == KeyEvent.VK_P) {
+            boolean paused = (am.isPaused()) ? false : true;
+            am.setPaused(paused);
+            if (paused) gameTimer.stop();
+            else gameTimer.start();
+
+        } else {
+            pc.keyReleased(e);
+        }
     }
 
     /**
