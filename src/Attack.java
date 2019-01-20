@@ -7,16 +7,25 @@ public class Attack {
     private String direction;
 
     public Attack() {
+        this.width = END_W;
         this.height = HEIGHT;
         this.extent = -180;
         this.start = 90;
         this.direction = "E";
     }
 
+    /**
+     * Gets height of the attack
+     * @return
+     */
     public int getHeight() {
         return (direction.compareTo("N") == 0) ? this.width : this.height;
     }
 
+    /**
+     * Gets width of the attack
+     * @return
+     */
     public int getWidth() {
         return (direction.compareTo("N") == 0) ? this.height : this.width;
     }
@@ -25,6 +34,10 @@ public class Attack {
         this.width = START_W;
     }
 
+    /**
+     * Gets direction of the attack
+     * @return
+     */
     public String getDirection() {
         return this.direction;
     }
@@ -33,16 +46,16 @@ public class Attack {
         return this.width >= END_W;
     }
 
+    public void increaseWidth() {
+        this.width += 5;
+    }
+
     public int getExtent() {
         return this.extent;
     }
 
     public int getStart() {
         return this.start;
-    }
-
-    public void increaseWidth() {
-        this.width += 5;
     }
 
     public void changeAttackAngle(String direction) {

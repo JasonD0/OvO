@@ -53,7 +53,6 @@ public class AssaultView {
                 a.getWidth(), a.getHeight(), a.getStart(), a.getExtent(), Arc2D.OPEN);
         g2d.draw(attack);
 
-
         g2d.dispose();
     }
 

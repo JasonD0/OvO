@@ -9,6 +9,7 @@ public class PlayerControl {
     private Timer attackCD, dashCD;
     private Player p;
     private Attack attackControl;
+    private int dashStart;
 
     public PlayerControl(AssaultModel am, AssaultView av, Player p, Attack a) {
         this.am = am;
@@ -30,7 +31,7 @@ public class PlayerControl {
     }
 
     private void initDashTimer() {
-        this.dashCD = new Timer(1500, new ActionListener() {
+        this.dashCD = new Timer(750, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 dashCD.stop();
@@ -43,6 +44,7 @@ public class PlayerControl {
         preventMoveAbove();
         preventMoveOutRight();
         preventMoveOutLeft();
+        if (p.isDashing()) dashEnd();
         p.setYOrd(p.getYOrd() + p.getVelY());
         p.setXOrd(p.getXOrd() + p.getVelX());
         if (!attackControl.isCompleted()) attackControl.increaseWidth();
@@ -65,15 +67,26 @@ public class PlayerControl {
         if (p.getXOrd() > 0) return;
         p.setXOrd(1);
         p.setVelX(0);
+        p.setDashing(false);
     }
 
     private void preventMoveOutRight() {
         if (p.getXOrd() + p.getPlayerLength() < am.GAME_LENGTH) return;
         p.setXOrd(am.GAME_LENGTH - p.getPlayerLength() - 1);
         p.setVelX(0);
+        p.setDashing(false);
+    }
+
+    private void dashEnd() {
+        if (Math.abs(p.getXOrd() - dashStart) < p.getMaxJump()) return;
+        p.setFalling(true);
+        p.setVelX(0);
+        p.setDashing(false);
+        p.setVelY(p.getMoveVel());
     }
 
     public void keyPressed(KeyEvent e) {
+        if (p.isDashing()) return;
         if (attackControl.isCompleted()) {
             if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
                 p.setVelX(p.getMoveVel());
@@ -102,14 +115,10 @@ public class PlayerControl {
             attackControl.resetWidth();
             attackCD.restart();
         }
-
-        if (e.getKeyCode() == KeyEvent.VK_C && !dashCD.isRunning()) {
-
-            dashCD.restart();
-        }
     }
 
     public void keyReleased(KeyEvent e) {
+        if (p.isDashing()) return;
         if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
             p.setVelX(0);
         }
@@ -121,6 +130,15 @@ public class PlayerControl {
         if (e.getKeyCode() == KeyEvent.VK_Z) {
             p.setVelY(p.getMoveVel());
             p.setFalling(true);
+        }
+
+        if (e.getKeyCode() == KeyEvent.VK_C && !dashCD.isRunning()) {
+            int direction = (p.getDirection().compareTo("E") == 0) ? 1 : -1;
+            p.setDashing(true);
+            dashStart = p.getXOrd();
+            p.setVelY(0);
+            p.setVelX(20*direction);
+            dashCD.restart();
         }
     }
 }
