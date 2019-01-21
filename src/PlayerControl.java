@@ -6,21 +6,20 @@ import javax.swing.Timer;
 
 public class PlayerControl {
     private AssaultModel am;
-    private AssaultView av;
-    private Timer attackCD, dashCD;
+    private Timer attackCD, dashCD, damageCD;
     private Player p;
-    private Attack attackControl;
+    private Attack attack;
     private int dashStart;
     private HashMap<Integer, Boolean> pressedKeys;
 
-    public PlayerControl(AssaultModel am, AssaultView av, Player p, Attack a) {
+    public PlayerControl(AssaultModel am, Player p, Attack a) {
         this.am = am;
-        this.av = av;
         this.p = p;
-        this.attackControl = a;
+        this.attack = a;
         this.pressedKeys = new HashMap<>();
         initAttackTimer();
         initDashTimer();
+        initDamageTimer();
     }
 
     /**
@@ -49,19 +48,50 @@ public class PlayerControl {
     }
 
     /**
+     * Cooldown for taking damage
+     */
+    private void initDamageTimer() {
+        this.damageCD = new Timer(1000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                p.setDamaged(false);
+                damageCD.stop();
+            }
+        });
+    }
+
+    /**
      * Incrementally move the player
      */
     public void move() {
-        moveRight();
-        moveLeft();
-        stopOnPlatform();
-        stopAtMaxJump();
-        stopAtRightWall();
-        stopAtLeftWall();
-        if (p.isDashing()) dashEnd();
+        if (p.isDead()) die();
+        else {
+            moveRight();
+            moveLeft();
+            stopOnPlatform();
+            stopAtMaxJump();
+            stopAtRightWall();
+            stopAtLeftWall();
+            if (p.isDashing()) dashEnd();
+            p.setYOrd(p.getYOrd() + p.getVelY());
+            p.setXOrd(p.getXOrd() + p.getVelX());
+            if (!attack.isCompleted()) attack.increaseWidth();
+        }
+    }
+
+    /**
+     * Ascends player to heaven 😇
+     */
+    private void die() {
+        p.setVelX(0);
+        p.setVelY(-p.getMoveVel());
         p.setYOrd(p.getYOrd() + p.getVelY());
-        p.setXOrd(p.getXOrd() + p.getVelX());
-        if (!attackControl.isCompleted()) attackControl.increaseWidth();
+    }
+
+    public void takeDamage() {
+        p.setDamaged(true);
+        this.damageCD.restart();
+        p.setHealth(p.getHealth() - 10);
     }
 
     /**
@@ -109,7 +139,7 @@ public class PlayerControl {
      * Stop player dash
      */
     private void dashEnd() {
-        if (Math.abs(p.getXOrd() - dashStart) < p.getMaxJump()) return;
+        if (Math.abs(p.getXOrd() - dashStart) < p.getMaxDash()) return;
         p.setVelX(0);
         p.setDashing(false);
         // let player fall if player dashed in the air
@@ -127,7 +157,7 @@ public class PlayerControl {
         if (!isKeyPressed(KeyEvent.VK_RIGHT) || isKeyPressed(KeyEvent.VK_C)) return;
         p.setVelX(p.getMoveVel());
         p.setDirection("E");
-        attackControl.changeAttackAngle("E");
+        attack.changeAttackAngle("E");
     }
 
     /**
@@ -138,7 +168,7 @@ public class PlayerControl {
         if (!isKeyPressed(KeyEvent.VK_LEFT) || isKeyPressed(KeyEvent.VK_C)) return;
         p.setVelX(-p.getMoveVel());
         p.setDirection("W");
-        attackControl.changeAttackAngle("W");
+        attack.changeAttackAngle("W");
     }
 
     /**
@@ -153,14 +183,14 @@ public class PlayerControl {
     public void keyPressed(int key) {
         if (p.isDashing()) return;  // prevent changes in movement during a player dash
 
-        if (attackControl.isCompleted()) {  // prevent changes in movement during player attack
+        if (attack.isCompleted()) {  // prevent changes in movement during player attack
             // move player in the direction
-            if (key == KeyEvent.VK_RIGHT || (isKeyPressed(KeyEvent.VK_RIGHT) && !p.isDashing())) moveRight();
-            else if (key == KeyEvent.VK_LEFT || (isKeyPressed(KeyEvent.VK_LEFT) && !p.isDashing())) moveLeft();
-            else if (key == KeyEvent.VK_UP) {
+            if (key == KeyEvent.VK_UP) {
                 p.setDirection("N");
-                attackControl.changeAttackAngle("N");
+                attack.changeAttackAngle("N");
             }
+            else if (key == KeyEvent.VK_RIGHT || (isKeyPressed(KeyEvent.VK_RIGHT) && !p.isDashing())) moveRight();
+            else if (key == KeyEvent.VK_LEFT || (isKeyPressed(KeyEvent.VK_LEFT) && !p.isDashing())) moveLeft();
         }
 
         if (key == KeyEvent.VK_Z) pressedJump();
@@ -186,7 +216,7 @@ public class PlayerControl {
      */
     private void pressedAttack() {
         if (attackCD.isRunning()) return;
-        attackControl.resetWidth();
+        attack.resetWidth();
         attackCD.restart();
     }
 

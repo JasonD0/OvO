@@ -20,6 +20,7 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
     private Enemy e;
     private Attack playerAttack;
     private PlayerControl pc;
+    private EnemyControl ec;
 
     public AssaultControl() {
         this.av = new AssaultView();
@@ -27,7 +28,8 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
         this.p = new Player(100, am.PLATFORM_Y - 25, 25, 25, 0,0, 100, Color.BLACK);
         this.e = new Enemy(1300, am.PLATFORM_Y - 50, 50, 50, 0, 0, 100, Color.WHITE);
         this.playerAttack = new Attack();
-        this.pc = new PlayerControl(am, av, p, playerAttack);
+        this.pc = new PlayerControl(am, p, playerAttack);
+        this.ec = new EnemyControl(am, e);
         init();
     }
 
@@ -80,7 +82,23 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
     private void actionPerformed() {
         if (am.isPaused()) return;
         requestFocusInWindow();
+        if (isCollided() && !p.isDamaged()) pc.takeDamage();
+        if (enemyHit() && !e.isDamaged()) ec.takeDamage();
+        if (playerAttack.isCompleted()) e.setDamaged(false);
         pc.move();
+        ec.move();
+    }
+
+    private boolean playerHit() {
+        return true;
+    }
+
+    private boolean enemyHit() {
+        return (playerAttack.isCompleted()) ? false : playerAttack.getBounds(p).intersects(e.getBoundary());
+    }
+
+    private boolean isCollided() {
+        return p.getBoundary().intersects(e.getBoundary());
     }
 
     @Override

@@ -1,3 +1,5 @@
+import java.awt.Rectangle;
+
 public class Attack {
     private final static int START_W = 70;
     private final static int END_W = 110;
@@ -14,6 +16,18 @@ public class Attack {
         this.direction = "E";
     }
 
+    public int getX(Entity p) {
+        // offset    separates attack from the player
+        int offset = (this.extent == -180) ? 25 : -25;
+        // x    x-ordinate of top left boundary of the circle (not the visible arc)
+        return (this.direction.compareTo("N") == 0) ? p.getXOrd() + p.getPlayerLength()/3
+                                                    : p.getXOrd() + p.getPlayerLength()/2 - this.width/2 + offset;
+    }
+
+    public int getY(Entity p) {
+        return (this.direction.compareTo("N") == 0) ? p.getYOrd() - p.getPlayerHeight()/2  - this.width/2 : p.getYOrd();
+    }
+
     /**
      * Gets height of the attack
      * @return
@@ -28,6 +42,10 @@ public class Attack {
      */
     public int getWidth() {
         return (direction.compareTo("N") == 0) ? this.height : this.width;
+    }
+
+    public Rectangle getBounds(Player p) {
+        return new Rectangle(getX(p), getY(p), getWidth(), getHeight());
     }
 
     public void resetWidth() {

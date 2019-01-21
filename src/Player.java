@@ -3,9 +3,10 @@ import java.awt.Color;
 public class Player extends Entity {
     private int moveVel;
     private int maxJump;
-    private boolean falling, dashing;
+    private boolean falling, dashing, damaged;
     private String direction;
-    private final static int MAX_DASH = 150;
+    private Float opacity;
+    private final static int MAX_DASH = 180;
 
     public Player(int x, int y, int h, int l, int velX, int velY, int health, Color c) {
         super(x, y, h, l, velX, velY, health, c);
@@ -13,7 +14,9 @@ public class Player extends Entity {
         this.maxJump = 180;
         this.falling = false;
         this.dashing = false;
+        this.damaged = false;
         this.direction = "E";
+        this.opacity = 1f;
     }
 
     public int getMoveVel() {
@@ -43,6 +46,14 @@ public class Player extends Entity {
 
     public boolean isDashing() {
         return this.dashing;
+    }
+
+    public void setDamaged(boolean b) {
+        this.damaged = b;
+    }
+
+    public boolean isDamaged() {
+        return this.damaged;
     }
 
     public void setDirection(String d) {

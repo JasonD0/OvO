@@ -86,4 +86,12 @@ public class Entity {
     public Color getColor() {
         return c;
     }
+
+    public boolean isDead() {
+        return this.health <= 0;
+    }
+
+    public boolean inFrame() {
+        return y > -height;
+    }
 }
