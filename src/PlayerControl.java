@@ -98,7 +98,7 @@ public class PlayerControl {
      * Prevent player from jumping higher than the maximum jump
      */
     private void stopAtMaxJump() {
-        if (am.PLATFORM_Y - p.getYOrd() < p.getMaxJump()) return;
+        if (am.PLATFORM_Y - p.getYOrd() < p.getMaxJump() || p.isDashing()) return;
         p.setVelY(p.getMoveVel());
         p.setFalling(true);
     }

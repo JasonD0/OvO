@@ -1,4 +1,5 @@
 import java.awt.Color;
+import java.awt.Point;
 
 public class AssaultModel {
     public final static int GAME_LENGTH = 1484;
@@ -9,10 +10,12 @@ public class AssaultModel {
     public final static Color DARK_GRAY = new Color(45, 45, 45);
     private int counter;
     private boolean paused;
+    private Player p;
 
-    public AssaultModel() {
+    public AssaultModel(Player p) {
         this.counter = 0;
         this.paused = false;
+        this.p = p;
     }
 
     public void updateCounter() {
@@ -29,5 +32,9 @@ public class AssaultModel {
 
     public boolean isPaused() {
         return this.paused;
+    }
+
+    public Point getPlayerPos() {
+        return new Point(p.getXOrd(), p.getYOrd());
     }
 }

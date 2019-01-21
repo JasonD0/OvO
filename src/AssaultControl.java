@@ -19,17 +19,19 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
     private Player p;
     private Enemy e;
     private Attack playerAttack;
+    private EnemyAttack enemyAttack;
     private PlayerControl pc;
     private EnemyControl ec;
 
     public AssaultControl() {
-        this.av = new AssaultView();
-        this.am = new AssaultModel();
         this.p = new Player(100, am.PLATFORM_Y - 25, 25, 25, 0,0, 100, Color.BLACK);
         this.e = new Enemy(1300, am.PLATFORM_Y - 50, 50, 50, 0, 0, 100, Color.WHITE);
         this.playerAttack = new Attack();
+        this.enemyAttack = new EnemyAttack(e);
+        this.am = new AssaultModel(p);
+        this.av = new AssaultView();
         this.pc = new PlayerControl(am, p, playerAttack);
-        this.ec = new EnemyControl(am, e);
+        this.ec = new EnemyControl(am, e, enemyAttack);
         init();
     }
 

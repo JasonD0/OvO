@@ -92,6 +92,6 @@ public class Entity {
     }
 
     public boolean inFrame() {
-        return y > -height;
+        return y > -height && y < 700;
     }
 }
