@@ -107,8 +107,8 @@ public class PlayerControl {
      * Prevent player from falling below the platform
      */
     private void stopOnPlatform() {
-        if (p.getYOrd() <= am.PLATFORM_Y - p.getPlayerHeight()) return;
-        p.setYOrd(am.PLATFORM_Y - p.getPlayerHeight());
+        if (p.getYOrd() <= am.PLATFORM_Y - p.getHeight()) return;
+        p.setYOrd(am.PLATFORM_Y - p.getHeight());
         p.setVelY(0);
         p.setFalling(false);
     }
@@ -120,7 +120,7 @@ public class PlayerControl {
         if (p.getXOrd() > 0) return;
         p.setXOrd(1);
         p.setVelX(0);
-        if (p.getYOrd() + p.getPlayerHeight() < am.PLATFORM_Y) p.setVelY(p.getMoveVel());
+        if (p.getYOrd() + p.getHeight() < am.PLATFORM_Y) p.setVelY(p.getMoveVel());
         p.setDashing(false);
     }
 
@@ -128,10 +128,10 @@ public class PlayerControl {
      * Prevent player from moving past the right wall
      */
     private void stopAtRightWall() {
-        if (p.getXOrd() + p.getPlayerLength() < am.GAME_LENGTH) return;
-        p.setXOrd(am.GAME_LENGTH - p.getPlayerLength() - 1);
+        if (p.getXOrd() + p.getLength() < am.GAME_LENGTH) return;
+        p.setXOrd(am.GAME_LENGTH - p.getLength() - 1);
         p.setVelX(0);
-        if (p.getYOrd() + p.getPlayerHeight() < am.PLATFORM_Y) p.setVelY(p.getMoveVel());
+        if (p.getYOrd() + p.getHeight() < am.PLATFORM_Y) p.setVelY(p.getMoveVel());
         p.setDashing(false);
     }
 
@@ -143,7 +143,7 @@ public class PlayerControl {
         p.setVelX(0);
         p.setDashing(false);
         // let player fall if player dashed in the air
-        if (p.getYOrd() + p.getPlayerHeight() < am.PLATFORM_Y) {
+        if (p.getYOrd() + p.getHeight() < am.PLATFORM_Y) {
             p.setFalling(true);
             p.setVelY(p.getMoveVel());
         }
@@ -153,7 +153,7 @@ public class PlayerControl {
      * Move the player in the right direction
      */
     private void moveRight() {
-        if (p.getXOrd() + p.getPlayerLength() >= am.GAME_LENGTH - 1) return;
+        if (p.getXOrd() + p.getLength() >= am.GAME_LENGTH - 1) return;
         if (!isKeyPressed(KeyEvent.VK_RIGHT) || isKeyPressed(KeyEvent.VK_C)) return;
         p.setVelX(p.getMoveVel());
         p.setDirection("E");
@@ -181,7 +181,8 @@ public class PlayerControl {
     }
 
     public void keyPressed(int key) {
-        if (p.isDashing()) return;  // prevent changes in movement during a player dash
+        // prevent changes in movement during a player dash
+        if (p.isDashing()) return;
 
         if (attack.isCompleted()) {  // prevent changes in movement during player attack
             // move player in the direction

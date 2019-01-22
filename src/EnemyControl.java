@@ -28,7 +28,7 @@ public class EnemyControl {
             @Override
             public void actionPerformed(ActionEvent ee) {
                 e.setAttacking(true);       // ensures enemy only attacks after timer delay
-                attackCD.setDelay(rand.nextInt(2000 - 500 + 1) + 500);
+                attackCD.setDelay(rand.nextInt(5000 - 3000 + 1) + 3000);
             }
         });
         this.attackCD.start();
@@ -38,7 +38,7 @@ public class EnemyControl {
         if (e.isDead()) die();
         else {
             if (e.isAttacking()) performAttack();
-            else currentAttack = 0;
+            else if (!e.isWaiting()) currentAttack = 0;
             stopOnPlatform();
             stopAtRightWall();
             stopAtLeftWall();
@@ -62,16 +62,19 @@ public class EnemyControl {
     }
 
     private void stopOnPlatform() {
-        if (e.getYOrd() + e.getPlayerHeight() < am.PLATFORM_Y) return;
-        e.setYOrd(am.PLATFORM_Y - e.getPlayerHeight());
+        if (e.getYOrd() + e.getHeight() <= am.PLATFORM_Y) return;
+        if (currentAttack == 5) e.setWaiting(true);
+        currentAttack = 0;
+        ea.endAttack();
+        e.setYOrd(am.PLATFORM_Y - e.getHeight());
         e.setVelY(0);
     }
 
     private void stopAtRightWall() {
-        if (e.getXOrd() + e.getPlayerLength() < am.GAME_LENGTH) return;
+        if (e.getXOrd() + e.getLength() < am.GAME_LENGTH) return;
         currentAttack = 0;
         ea.endAttack();
-        e.setXOrd(am.GAME_LENGTH - e.getPlayerLength() - 1);
+        e.setXOrd(am.GAME_LENGTH - e.getLength() - 1);
         e.setVelX(0);
     }
 

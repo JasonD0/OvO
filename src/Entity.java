@@ -27,12 +27,20 @@ public class Entity {
         return new Rectangle(x, y, length, height);
     }
 
-    public int getPlayerLength() {
+    public int getLength() {
         return length;
     }
 
-    public int getPlayerHeight() {
+    public int getHeight() {
         return height;
+    }
+
+    public void setLength(int l) {
+        this.length = l;
+    }
+
+    public void setHeight(int h) {
+        this.height = h;
     }
 
     public int getXOrd() {

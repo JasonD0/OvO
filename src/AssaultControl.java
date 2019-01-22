@@ -5,6 +5,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
@@ -22,6 +24,7 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
     private EnemyAttack enemyAttack;
     private PlayerControl pc;
     private EnemyControl ec;
+    private List<Obstacle> obstacles;
 
     public AssaultControl() {
         this.p = new Player(100, am.PLATFORM_Y - 25, 25, 25, 0,0, 100, Color.BLACK);
@@ -32,6 +35,7 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
         this.av = new AssaultView();
         this.pc = new PlayerControl(am, p, playerAttack);
         this.ec = new EnemyControl(am, e, enemyAttack);
+        this.obstacles = new ArrayList<>();
         init();
     }
 
@@ -84,6 +88,7 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
     private void actionPerformed() {
         if (am.isPaused()) return;
         requestFocusInWindow();
+        if (e.isWaiting()) growShockwave();
         if (isCollided() && !p.isDamaged()) pc.takeDamage();
         if (enemyHit() && !e.isDamaged()) ec.takeDamage();
         if (playerAttack.isCompleted()) e.setDamaged(false);
@@ -91,8 +96,43 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
         ec.move();
     }
 
-    private boolean playerHit() {
-        return true;
+    private void growShockwave() {
+        for (int i = 0; i < obstacles.size(); i++) {
+            Obstacle o = obstacles.get(i);
+            if (shockwaveCollision(o) && !p.isDamaged()) pc.takeDamage();
+
+            if (obstacles.size() != 18) break;
+            int direction = (i % 2 == 0) ? 1 : -1;  // ensures move all left/right parts of wave left/right
+            if (o.inFrame()) o.move(direction);
+        }
+
+        if (obstacles.size() == 0) {
+            Obstacle oRight = new Obstacle(e.getXOrd() + e.getLength() + 20, am.PLATFORM_Y - 20, 20, 20);
+            Obstacle oLeft = new Obstacle(e.getXOrd() - 20 - 20, am.PLATFORM_Y - 20, 20, 20);
+            obstacles.add(oRight);
+            obstacles.add(oLeft);
+
+        } else if (obstacles.size() == 18 && !obstacles.get(0).inFrame() &&
+                !obstacles.get(obstacles.size() - 1).inFrame()) {
+            e.setWaiting(false);
+            obstacles.clear();
+
+        } else if (obstacles.size() < 18) {
+            int heightDifference = 15;
+            Obstacle oR = obstacles.get(obstacles.size() - 2);
+            Obstacle oL = obstacles.get(obstacles.size() - 1);
+            int h = (obstacles.size() > 8) ? oR.getHeight() - heightDifference : oR.getHeight() + heightDifference;
+            int y = (obstacles.size() > 8) ? oR.getY() + heightDifference : oR.getY() - heightDifference;
+            Obstacle oRight = new Obstacle(oR.getX() + oR.getLength(), y, oR.getLength(), h);
+            Obstacle oLeft = new Obstacle(oL.getX() - oL.getLength(), y, oL.getLength(), h);
+
+            obstacles.add(oRight);
+            obstacles.add(oLeft);
+        }
+    }
+
+    private boolean shockwaveCollision(Obstacle o) {
+        return p.getBoundary().intersects(o.getBounds());
     }
 
     private boolean enemyHit() {
@@ -107,7 +147,9 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         av.drawEntity(g, e, null);
+        if (e.isWaiting()) av.drawShockwave(g, obstacles, am.AQUA);
         av.drawEntity(g, p, playerAttack);
+
     }
 
     @Override

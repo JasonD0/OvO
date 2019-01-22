@@ -20,12 +20,12 @@ public class Attack {
         // offset    separates attack from the player
         int offset = (this.extent == -180) ? 25 : -25;
         // x    x-ordinate of top left boundary of the circle (not the visible arc)
-        return (this.direction.compareTo("N") == 0) ? p.getXOrd() + p.getPlayerLength()/3
-                                                    : p.getXOrd() + p.getPlayerLength()/2 - this.width/2 + offset;
+        return (this.direction.compareTo("N") == 0) ? p.getXOrd() + p.getLength()/3
+                                                    : p.getXOrd() + p.getLength()/2 - this.width/2 + offset;
     }
 
     public int getY(Entity p) {
-        return (this.direction.compareTo("N") == 0) ? p.getYOrd() - p.getPlayerHeight()/2  - this.width/2 : p.getYOrd();
+        return (this.direction.compareTo("N") == 0) ? p.getYOrd() - p.getHeight()/2  - this.width/2 : p.getYOrd();
     }
 
     /**
