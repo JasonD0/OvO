@@ -22,6 +22,7 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
     private Enemy e;
     private Attack playerAttack;
     private EnemyAttack enemyAttack;
+    private EnemyAttackControl eac;
     private PlayerControl pc;
     private EnemyControl ec;
     private List<Obstacle> obstacles;
@@ -30,11 +31,11 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
         this.p = new Player(100, am.PLATFORM_Y - 25, 25, 25, 0,0, 100, Color.BLACK);
         this.e = new Enemy(1300, am.PLATFORM_Y - 50, 50, 50, 0, 0, 100, Color.WHITE);
         this.playerAttack = new Attack();
-        this.enemyAttack = new EnemyAttack(e);
+        this.eac = new EnemyAttackControl(e);
         this.am = new AssaultModel(p);
         this.av = new AssaultView();
         this.pc = new PlayerControl(am, p, playerAttack);
-        this.ec = new EnemyControl(am, e, enemyAttack);
+        this.ec = new EnemyControl(am, e, eac);
         this.obstacles = new ArrayList<>();
         init();
     }
@@ -90,6 +91,7 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
         requestFocusInWindow();
         if (e.isWaiting()) growShockwave();
         if (isCollided() && !p.isDamaged()) pc.takeDamage();
+        if (eac.attackCollision(p) && !p.isDamaged()) pc.takeDamage();
         if (enemyHit() && !e.isDamaged()) ec.takeDamage();
         if (playerAttack.isCompleted()) e.setDamaged(false);
         pc.move();
@@ -97,20 +99,11 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
     }
 
     private void growShockwave() {
-        for (int i = 0; i < obstacles.size(); i++) {
-            Obstacle o = obstacles.get(i);
-            if (shockwaveCollision(o) && !p.isDamaged()) pc.takeDamage();
-
-            if (obstacles.size() != 18) break;
-            int direction = (i % 2 == 0) ? 1 : -1;  // ensures move all left/right parts of wave left/right
-            if (o.inFrame()) o.move(direction);
-        }
-
+        moveShockwave();
         if (obstacles.size() == 0) {
-            Obstacle oRight = new Obstacle(e.getXOrd() + e.getLength() + 20, am.PLATFORM_Y - 20, 20, 20);
-            Obstacle oLeft = new Obstacle(e.getXOrd() - 20 - 20, am.PLATFORM_Y - 20, 20, 20);
-            obstacles.add(oRight);
-            obstacles.add(oLeft);
+            // add part of right and left shockwave
+            obstacles.add(new Obstacle(e.getXOrd() + e.getLength() + 20, am.PLATFORM_Y - 20, 20, 20));
+            obstacles.add(new Obstacle(e.getXOrd() - 20 - 20, am.PLATFORM_Y - 20, 20, 20));
 
         } else if (obstacles.size() == 18 && !obstacles.get(0).inFrame() &&
                 !obstacles.get(obstacles.size() - 1).inFrame()) {
@@ -123,11 +116,22 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
             Obstacle oL = obstacles.get(obstacles.size() - 1);
             int h = (obstacles.size() > 8) ? oR.getHeight() - heightDifference : oR.getHeight() + heightDifference;
             int y = (obstacles.size() > 8) ? oR.getY() + heightDifference : oR.getY() - heightDifference;
-            Obstacle oRight = new Obstacle(oR.getX() + oR.getLength(), y, oR.getLength(), h);
-            Obstacle oLeft = new Obstacle(oL.getX() - oL.getLength(), y, oL.getLength(), h);
 
-            obstacles.add(oRight);
-            obstacles.add(oLeft);
+            // add part of right and left shockwave
+            obstacles.add(new Obstacle(oR.getX() + oR.getLength(), y, oR.getLength(), h));
+            obstacles.add(new Obstacle(oL.getX() - oL.getLength(), y, oL.getLength(), h));
+        }
+    }
+
+    private void moveShockwave() {
+        for (int i = 0; i < obstacles.size(); i++) {
+            Obstacle o = obstacles.get(i);
+            if (shockwaveCollision(o) && !p.isDamaged()) pc.takeDamage();
+
+            // move shockwave when total length is 18*20
+            if (obstacles.size() != 18) break;
+            int direction = (i % 2 == 0) ? 1 : -1;  // ensures move all left/right parts of wave left/right
+            if (o.inFrame()) o.move(direction);
         }
     }
 
@@ -149,6 +153,7 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
         av.drawEntity(g, e, null);
         if (e.isWaiting()) av.drawShockwave(g, obstacles, am.AQUA);
         av.drawEntity(g, p, playerAttack);
+        if (eac.getEnemyAttack().isCharging()) av.drawEnemyAttack(g, eac.getEnemyAttack());
 
     }
 

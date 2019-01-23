@@ -30,7 +30,7 @@ public class AssaultView {
         g2d.rotate(Math.toRadians(e.getAngle()), p.getX(), p.getY());
         Rectangle entity = e.getBoundary();
 
-        if (e.getClass() == Player.class && !a.isCompleted()) drawAttack(g, e, a);
+        if (e.getClass() == Player.class && !a.isCompleted()) drawPlayerAttack(g, e, a);
         if (e.getClass() == Player.class) changeOpacity(g2d, e);
 
         g2d.setColor(e.getColor());
@@ -59,7 +59,7 @@ public class AssaultView {
         if (player.isDamaged()) g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
     }
 
-    private void drawAttack(Graphics g, Entity e, Attack a) {
+    private void drawPlayerAttack(Graphics g, Entity e, Attack a) {
         Graphics2D g2d = (Graphics2D) g.create();
         g2d.setColor(Color.WHITE);
 
@@ -67,6 +67,16 @@ public class AssaultView {
         Arc2D.Double attack = new Arc2D.Double(a.getX(e), a.getY(e), a.getWidth(), a.getHeight(),
                 a.getStart(), a.getExtent(), Arc2D.OPEN);
         g2d.draw(attack);
+
+        g2d.dispose();
+    }
+
+    public void drawEnemyAttack(Graphics g, EnemyAttack ea) {
+        Graphics2D g2d = (Graphics2D) g.create();
+
+        g2d.setColor(Color.WHITE);
+        Ellipse2D.Double circle = new Ellipse2D.Double(ea.getX(), ea.getY(), ea.getWidth(), ea.getWidth());
+        g2d.draw(circle);
 
         g2d.dispose();
     }

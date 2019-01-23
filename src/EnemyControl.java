@@ -6,15 +6,16 @@ import javax.swing.Timer;
 public class EnemyControl {
     private AssaultModel am;
     private Enemy e;
+    private EnemyAttackControl eac;
     private EnemyAttack ea;
     private int currentAttack; // ensures current progresses until end
     private Timer attackCD;
     private Random rand;
 
-    public EnemyControl(AssaultModel am, Enemy e, EnemyAttack ea) {
+    public EnemyControl(AssaultModel am, Enemy e, EnemyAttackControl eac) {
         this.am = am;
         this.e = e;
-        this.ea = ea;
+        this.eac = eac;
         this.currentAttack = 0;
         this.rand = new Random();
         initAttackTimer();
@@ -58,14 +59,14 @@ public class EnemyControl {
 
     public void takeDamage() {
         e.setDamaged(true);
-        e.setHealth(e.getHealth() - 10);
+        e.setHealth(e.getHealth() - 5);
     }
 
     private void stopOnPlatform() {
         if (e.getYOrd() + e.getHeight() <= am.PLATFORM_Y) return;
         if (currentAttack == 5) e.setWaiting(true);
         currentAttack = 0;
-        ea.endAttack();
+        eac.endAttack();
         e.setYOrd(am.PLATFORM_Y - e.getHeight());
         e.setVelY(0);
     }
@@ -73,7 +74,7 @@ public class EnemyControl {
     private void stopAtRightWall() {
         if (e.getXOrd() + e.getLength() < am.GAME_LENGTH) return;
         currentAttack = 0;
-        ea.endAttack();
+        eac.endAttack();
         e.setXOrd(am.GAME_LENGTH - e.getLength() - 1);
         e.setVelX(0);
     }
@@ -81,13 +82,13 @@ public class EnemyControl {
     private void stopAtLeftWall() {
         if (e.getXOrd() > 0) return;
         currentAttack = 0;
-        ea.endAttack();
+        eac.endAttack();
         e.setXOrd(1);
         e.setVelX(0);
     }
 
     private void performAttack() {
-        currentAttack = ea.chooseAttack(am.getPlayerPos(), currentAttack);
+        currentAttack = eac.chooseAttack(am.getPlayerPos(), currentAttack);
 
     }
 }
