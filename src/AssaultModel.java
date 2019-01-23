@@ -11,11 +11,13 @@ public class AssaultModel {
     private int counter;
     private boolean paused;
     private Player p;
+    private Enemy e;
 
-    public AssaultModel(Player p) {
+    public AssaultModel(Player p, Enemy e) {
         this.counter = 0;
         this.paused = false;
         this.p = p;
+        this.e = e;
     }
 
     public void updateCounter() {
@@ -36,5 +38,9 @@ public class AssaultModel {
 
     public Point getPlayerPos() {
         return new Point(p.getXOrd(), p.getYOrd());
+    }
+
+    public Point getEnemyPos() {
+        return new Point(e.getXOrd(), e.getYOrd());
     }
 }

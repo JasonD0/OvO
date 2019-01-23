@@ -1,3 +1,4 @@
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -11,6 +12,7 @@ public class PlayerControl {
     private Attack attack;
     private int dashStart;
     private HashMap<Integer, Boolean> pressedKeys;
+    private Point enemyPos, startPos;
 
     public PlayerControl(AssaultModel am, Player p, Attack a) {
         this.am = am;
@@ -70,9 +72,12 @@ public class PlayerControl {
             moveLeft();
             stopOnPlatform();
             stopAtMaxJump();
+            stopAtCeiling();
             stopAtRightWall();
             stopAtLeftWall();
             if (p.isDashing()) dashEnd();
+            if (p.isKnockedUp()) knockUp();
+            if (p.isKnockedBack()) knockBack(null);
             p.setYOrd(p.getYOrd() + p.getVelY());
             p.setXOrd(p.getXOrd() + p.getVelX());
             if (!attack.isCompleted()) attack.increaseWidth();
@@ -94,11 +99,48 @@ public class PlayerControl {
         p.setHealth(p.getHealth() - 10);
     }
 
+    public void knockUp() {
+        if (!p.isKnockedUp()) p.setVelY(-p.getMoveVel() * 4);
+        else if (p.getYOrd() <= 200) p.setVelY(p.getMoveVel() * 2);
+        p.setVelX(0);
+        p.setKnockedUp(true);
+    }
+
+    public void knockBack(Point pos) {
+        p.setVelY(0);
+        p.setKnockedBack(true);
+        enemyPos = (pos == null) ? enemyPos : pos;
+        startPos = (pos == null) ? startPos : new Point(p.getXOrd(), p.getYOrd());
+        p.setYOrd(getLinearY(p.getXOrd(), (int) enemyPos.getX(), (int) enemyPos.getY()));
+        if (p.getXOrd() > enemyPos.getX()) p.setVelX(p.getMoveVel()*2);
+        else if (p.getXOrd() == enemyPos.getX()) p.setVelX(0);
+        else p.setVelX(-p.getMoveVel()*2);
+    }
+
+    // y = mx + b
+    // x2 y2  fixed position (use to b)     x1 y2  variable
+    private int getLinearY(int x1, int x2, int y2) {
+        double deltaX = (startPos.getX() - x2 == 0) ? 1 : startPos.getX() - x2;
+        double deltaY = startPos.getY() - y2;
+        double m = deltaY/deltaX;
+        double b = y2 - m*x2;
+        double dy = m*x1 + b;
+        return (int) dy;
+    }
+
+    private void stopAtCeiling() {
+        if (p.getYOrd() >= 0) return;
+        p.setYOrd(1);
+        p.setVelY(p.getMoveVel());
+        p.setKnockedBack(false);
+        p.setFalling(false);
+    }
+
     /**
      * Prevent player from jumping higher than the maximum jump
      */
     private void stopAtMaxJump() {
-        if (am.PLATFORM_Y - p.getYOrd() < p.getMaxJump() || p.isDashing()) return;
+        if (am.PLATFORM_Y - p.getYOrd() < p.getMaxJump() || p.isDashing() || p.isKnockedUp()) return;
         p.setVelY(p.getMoveVel());
         p.setFalling(true);
     }
@@ -111,6 +153,8 @@ public class PlayerControl {
         p.setYOrd(am.PLATFORM_Y - p.getHeight());
         p.setVelY(0);
         p.setFalling(false);
+        p.setKnockedUp(false);
+        p.setKnockedBack(false);
     }
 
     /**
@@ -122,6 +166,7 @@ public class PlayerControl {
         p.setVelX(0);
         if (p.getYOrd() + p.getHeight() < am.PLATFORM_Y) p.setVelY(p.getMoveVel());
         p.setDashing(false);
+        p.setKnockedBack(false);
     }
 
     /**
@@ -133,6 +178,7 @@ public class PlayerControl {
         p.setVelX(0);
         if (p.getYOrd() + p.getHeight() < am.PLATFORM_Y) p.setVelY(p.getMoveVel());
         p.setDashing(false);
+        p.setKnockedBack(false);
     }
 
     /**
@@ -182,7 +228,7 @@ public class PlayerControl {
 
     public void keyPressed(int key) {
         // prevent changes in movement during a player dash
-        if (p.isDashing()) return;
+        if (p.isDashing() || p.isKnockedUp() || p.isKnockedBack()) return;
 
         if (attack.isCompleted()) {  // prevent changes in movement during player attack
             // move player in the direction
@@ -236,7 +282,7 @@ public class PlayerControl {
     }
 
     public void keyReleased(int key) {
-        if (!p.isDashing()) {  // prevent changes in movement during a player dash
+        if (!p.isDashing() && !p.isKnockedUp() && !p.isKnockedBack()) {  // prevent changes in movement during a player dash
             if (key == KeyEvent.VK_RIGHT) p.setVelX(0); // stop the player from moving right
             if (key == KeyEvent.VK_LEFT) p.setVelX(0);  // stop the player from moving left
 

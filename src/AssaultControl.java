@@ -1,6 +1,7 @@
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -32,7 +33,7 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
         this.e = new Enemy(1300, am.PLATFORM_Y - 50, 50, 50, 0, 0, 100, Color.WHITE);
         this.playerAttack = new Attack();
         this.eac = new EnemyAttackControl(e);
-        this.am = new AssaultModel(p);
+        this.am = new AssaultModel(p, e);
         this.av = new AssaultView();
         this.pc = new PlayerControl(am, p, playerAttack);
         this.ec = new EnemyControl(am, e, eac);
@@ -83,7 +84,7 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
 
     private void addPlatform() {
         add(Box.createRigidArea(new Dimension(0, am.PLATFORM_Y)));
-        av.drawPlatform(this, am.GAME_LENGTH, am.AQUA);
+        av.drawPlatform(this, am.GAME_LENGTH, am.AQUA, am.LIGHT_GRAY);
     }
 
     private void actionPerformed() {
@@ -91,7 +92,12 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
         requestFocusInWindow();
         if (e.isWaiting()) growShockwave();
         if (isCollided() && !p.isDamaged()) pc.takeDamage();
-        if (eac.attackCollision(p) && !p.isDamaged()) pc.takeDamage();
+        if (eac.attackCollision(p) && !p.isDamaged()) {
+            if (eac.getCurrentAttack() == 7 && !p.isKnockedBack()) {
+                pc.knockBack(new Point(e.getXOrd(), e.getYOrd()));
+            }
+            pc.takeDamage();
+        }
         if (enemyHit() && !e.isDamaged()) ec.takeDamage();
         if (playerAttack.isCompleted()) e.setDamaged(false);
         pc.move();
@@ -126,7 +132,10 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
     private void moveShockwave() {
         for (int i = 0; i < obstacles.size(); i++) {
             Obstacle o = obstacles.get(i);
-            if (shockwaveCollision(o) && !p.isDamaged()) pc.takeDamage();
+            if (shockwaveCollision(o) && !p.isDamaged()) {
+                pc.knockUp();
+                pc.takeDamage();
+            }
 
             // move shockwave when total length is 18*20
             if (obstacles.size() != 18) break;

@@ -64,11 +64,11 @@ public class EnemyAttack {
         this.velX = velX;
     }
 
-    public void chargeBall() {
-        this.width += 2;
+    public void chargeBall(int increase) {
+        this.width += increase;
     }
 
     public Rectangle getBounds() {
-        return new Rectangle(this.x, this.y, this.width, this.width);
+        return new Rectangle(this.x - this.width, this.y - this.width, this.width*2, this.width*2);
     }
 }

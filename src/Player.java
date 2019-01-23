@@ -3,7 +3,7 @@ import java.awt.Color;
 public class Player extends Entity {
     private int moveVel;
     private int maxJump;
-    private boolean falling, dashing, damaged;
+    private boolean falling, dashing, damaged, knockedUp, knockedBack;
     private String direction;
     private Float opacity;
     private final static int MAX_DASH = 180;
@@ -15,6 +15,8 @@ public class Player extends Entity {
         this.falling = false;
         this.dashing = false;
         this.damaged = false;
+        this.knockedUp = false;
+        this.knockedBack = false;
         this.direction = "E";
         this.opacity = 1f;
     }
@@ -66,5 +68,21 @@ public class Player extends Entity {
 
     public int getMaxDash() {
         return this.MAX_DASH;
+    }
+
+    public void setKnockedUp(boolean b) {
+        this.knockedUp = b;
+    }
+
+    public boolean isKnockedUp() {
+        return this.knockedUp;
+    }
+
+    public void setKnockedBack(boolean b) {
+        this.knockedBack = b;
+    }
+
+    public boolean isKnockedBack() {
+        return this.knockedBack;
     }
 }

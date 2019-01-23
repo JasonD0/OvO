@@ -9,12 +9,14 @@ public class EnemyAttackControl {
     private Point playerPos, startPos;  // saves starting co-ordinates of the attack for both
     private boolean flag;   // helper flags for attacks
     private EnemyAttack ea;
+    private int currentAttack;
 
     public EnemyAttackControl(Enemy e) {
         this.e = e;
         this.ea = new EnemyAttack();
         this.rand = new Random();
         this.flag = false;
+        this.currentAttack = 0;
     }
 
     public EnemyAttack getEnemyAttack() {
@@ -32,19 +34,24 @@ public class EnemyAttackControl {
         if (playerPos == null) setDirection(pos);
         if (startPos == null) startPos = new Point(e.getXOrd(), e.getYOrd());
 
-        int a = (attack == 0) ? rand.nextInt(NUM_ATTACKS) + 1 : attack;
-//        int a = 6;
+        //currentAttack = (attack == 0) ? rand.nextInt(NUM_ATTACKS) + 1 : attack;
+        currentAttack = 7;
 
-        switch (a) {
+        switch (currentAttack) {
             case 1: rollAttack(); break;
             case 2: rush(); break;
             case 3: jump(); break;
             case 4: snail(); break;
             case 5: jumpShock(); break;
             case 6: energyBall(); break;
+            case 7: pulse(); break;
         }
 
-        return a;
+        return currentAttack;
+    }
+
+    public int getCurrentAttack() {
+        return this.currentAttack;
     }
 
     /**
@@ -213,13 +220,39 @@ public class EnemyAttackControl {
 
         } else if (Math.abs(playerPos.getX() - e.getXOrd()) < 300) {
             e.setVelX(0);
+            // create ball
             if (!ea.isCharging()) {
                 ea.setCharging(true);
                 ea.initBall(e.getXOrd() + e.getLength()/2 + directionX*(e.getLength()/2 + 35), e.getYOrd(), 2, 15);
 
+            // increase ball size and release
             } else {
-                if (ea.getWidth() >= 30) ea.setX(ea.getX() + ea.getVelX()*directionX);
-                else ea.chargeBall();
+                if (ea.getWidth() >= 25) ea.setX(ea.getX() + ea.getVelX()*directionX);
+                else ea.chargeBall(2);
+            }
+
+        } else {
+            moveTowardsPlayer();
+        }
+    }
+
+    /**
+     * Circle expands from enemy that knocks back and damages player
+     */
+    private void pulse() {
+        if (Math.abs(playerPos.getX() - e.getXOrd()) < 300) {
+            e.setVelX(0);
+            if (!ea.isCharging()) {
+                ea.setCharging(true);
+                ea.initBall(e.getXOrd() + e.getLength()/2, e.getYOrd() + e.getHeight()/2, 2, 0);
+
+            } else {
+                if (ea.getWidth() >= 450) {
+                    ea.setY(-900);
+                    endAttack();
+                }
+                else if (ea.getWidth() < 150) ea.chargeBall(5);
+                else ea.chargeBall(10);
             }
 
         } else {

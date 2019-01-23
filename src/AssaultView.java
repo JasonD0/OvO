@@ -13,7 +13,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 
 public class AssaultView {
-    public void drawPlatform(AssaultControl parent, int l, Color c) {
+    public void drawPlatform(AssaultControl parent, int l, Color c, Color c1) {
         JLabel platform = new JLabel();
         platform.setBorder(BorderFactory.createMatteBorder(20, 0, 0, 0, c));
         platform.setMaximumSize(new Dimension(l, 20));
@@ -21,6 +21,12 @@ public class AssaultView {
         platform.setPreferredSize(new Dimension(l,20));
         platform.setBackground(c);
         parent.add(platform);
+        JLabel ca = new JLabel();
+        ca.setBorder(BorderFactory.createMatteBorder(50, 0, 0, 0, c1));
+        ca.setMaximumSize(new Dimension(l, 50));
+        ca.setMinimumSize(new Dimension(l, 50));
+        ca.setPreferredSize(new Dimension(l,50));
+        parent.add(ca);
     }
 
     public void drawEntity(Graphics g, Entity e, Attack a) {
@@ -75,8 +81,10 @@ public class AssaultView {
         Graphics2D g2d = (Graphics2D) g.create();
 
         g2d.setColor(Color.WHITE);
-        Ellipse2D.Double circle = new Ellipse2D.Double(ea.getX(), ea.getY(), ea.getWidth(), ea.getWidth());
-        g2d.draw(circle);
+        //Ellipse2D.Double circle = new Ellipse2D.Double(ea.getX(), ea.getY(), ea.getWidth(), ea.getWidth());
+        //g2d.draw(circle);
+
+        g2d.drawOval(ea.getX() - ea.getWidth(), ea.getY() - ea.getWidth(), ea.getWidth()*2, ea.getWidth()*2);
 
         g2d.dispose();
     }
