@@ -22,7 +22,6 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
     private Player p;
     private Enemy e;
     private Attack playerAttack;
-    private EnemyAttack enemyAttack;
     private EnemyAttackControl eac;
     private PlayerControl pc;
     private EnemyControl ec;
@@ -97,6 +96,7 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
                 pc.knockBack(new Point(e.getXOrd(), e.getYOrd()));
             }
             pc.takeDamage();
+            System.out.println(p.getHealth());
         }
         if (enemyHit() && !e.isDamaged()) ec.takeDamage();
         if (playerAttack.isCompleted()) e.setDamaged(false);
@@ -162,8 +162,13 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
         av.drawEntity(g, e, null);
         if (e.isWaiting()) av.drawShockwave(g, obstacles, am.AQUA);
         av.drawEntity(g, p, playerAttack);
-        if (eac.getEnemyAttack().isCharging()) av.drawEnemyAttack(g, eac.getEnemyAttack());
+        if (eac.getEnemyAttack().isCharging()) drawEnemyAttack(g);
+    }
 
+    private void drawEnemyAttack(Graphics g) {
+        Color c = (eac.getCurrentAttack() == 8) ? Color.WHITE : am.LIGHT_GRAY;
+        av.drawBallAttack(g, eac.getEnemyAttack(), c);
+        if (eac.getCurrentAttack() == 8) av.drawLaser(g, eac.getEnemyAttack());
     }
 
     @Override
@@ -177,8 +182,13 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
         if (e.getKeyCode() == KeyEvent.VK_P) {
             boolean paused = (am.isPaused()) ? false : true;
             am.setPaused(paused);
-            if (paused) gameTimer.stop();
-            else gameTimer.start();
+            if (paused) {
+                ec.stopAttackTimer();
+                gameTimer.stop();
+            } else {
+                ec.startAttackTimer();
+                gameTimer.start();
+            }
 
         } else {
             pc.keyReleased(e.getKeyCode());

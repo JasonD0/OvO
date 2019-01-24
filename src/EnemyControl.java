@@ -7,7 +7,6 @@ public class EnemyControl {
     private AssaultModel am;
     private Enemy e;
     private EnemyAttackControl eac;
-    private EnemyAttack ea;
     private int currentAttack; // ensures current progresses until end
     private Timer attackCD;
     private Random rand;
@@ -25,11 +24,11 @@ public class EnemyControl {
      * Cooldown for attacks
      */
     private void initAttackTimer() {
-        this.attackCD = new Timer(1000, new ActionListener() {
+        this.attackCD = new Timer(1500, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ee) {
-                e.setAttacking(true);       // ensures enemy only attacks after timer delay
                 attackCD.setDelay(rand.nextInt(5000 - 3000 + 1) + 3000);
+                e.setAttacking(true);       // ensures enemy only attacks after timer delay
             }
         });
         this.attackCD.start();
@@ -90,5 +89,13 @@ public class EnemyControl {
     private void performAttack() {
         currentAttack = eac.chooseAttack(am.getPlayerPos(), currentAttack);
 
+    }
+
+    public void stopAttackTimer() {
+        this.attackCD.stop();
+    }
+
+    public void startAttackTimer() {
+        this.attackCD.start();
     }
 }

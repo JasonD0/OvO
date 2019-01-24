@@ -35,7 +35,7 @@ public class EnemyAttackControl {
         if (startPos == null) startPos = new Point(e.getXOrd(), e.getYOrd());
 
         //currentAttack = (attack == 0) ? rand.nextInt(NUM_ATTACKS) + 1 : attack;
-        currentAttack = 7;
+        currentAttack = 8;
 
         switch (currentAttack) {
             case 1: rollAttack(); break;
@@ -45,6 +45,7 @@ public class EnemyAttackControl {
             case 5: jumpShock(); break;
             case 6: energyBall(); break;
             case 7: pulse(); break;
+            case 8: laser(); break;
         }
 
         return currentAttack;
@@ -62,11 +63,14 @@ public class EnemyAttackControl {
         playerPos = pos;
         this.directionX = (playerPos.getX() < e.getXOrd()) ? -1 : 1;
         this.directionY = (playerPos.getY() < e.getYOrd()) ? -1 : 1;
+        ea.setDirX(directionX);
     }
 
     public void endAttack() {
         e.setAttacking(false);
         ea.setCharging(false);
+        ea.setOpacity(0f);
+        ea.setBallOpacity(1f);
         playerPos = null;
         startPos = null;
         flag = false;
@@ -248,7 +252,7 @@ public class EnemyAttackControl {
 
             } else {
                 if (ea.getWidth() >= 450) {
-                    ea.setY(-900);
+                    ea.initBall(0, 0, 0, 0);
                     endAttack();
                 }
                 else if (ea.getWidth() < 150) ea.chargeBall(5);
@@ -260,7 +264,33 @@ public class EnemyAttackControl {
         }
     }
 
+    /**
+     * Shoots laser at enemy
+     */
+    private void laser() {
+        // charge laser
+        if (!ea.isCharging()) {
+            ea.setCharging(true);
+            ea.initBall(e.getXOrd() + e.getLength()/2 + directionX*e.getLength(), e.getYOrd() + e.getHeight()/2, 2, 0);
+
+        } else {
+            // lower laser opacity
+            if (Float.compare(ea.getOpacity(), 1f) > 0 || flag) {
+                ea.setOpacity(ea.getOpacity() - 0.05f);
+                ea.setBallOpacity(ea.getOpacity());
+                flag = true;
+                if (Float.compare(ea.getOpacity(), 0f) < 0) endAttack();
+            }
+
+            // increase laser opacity
+            else if (ea.getWidth() >= 25) ea.setOpacity(ea.getOpacity() + 0.1f);
+
+            // increase size of laser
+            else ea.chargeBall(1);
+        }
+    }
+
     public boolean attackCollision(Player p) {
-        return p.getBoundary().intersects(ea.getBounds());
+        return (p.getBoundary().intersects(ea.getBallBounds()) || p.getBoundary().intersects(ea.getLaserBounds()) && ea.getOpacity() > 0);
     }
 }

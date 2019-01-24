@@ -7,7 +7,6 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Ellipse2D;
-import java.util.ArrayList;
 import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
@@ -68,24 +67,31 @@ public class AssaultView {
     private void drawPlayerAttack(Graphics g, Entity e, Attack a) {
         Graphics2D g2d = (Graphics2D) g.create();
         g2d.setColor(Color.WHITE);
-
         //extent  90 = half of arc   180 = full arc  360 = ellipse
         Arc2D.Double attack = new Arc2D.Double(a.getX(e), a.getY(e), a.getWidth(), a.getHeight(),
                 a.getStart(), a.getExtent(), Arc2D.OPEN);
         g2d.draw(attack);
-
         g2d.dispose();
     }
 
-    public void drawEnemyAttack(Graphics g, EnemyAttack ea) {
+    public void drawBallAttack(Graphics g, EnemyAttack ea, Color c) {
         Graphics2D g2d = (Graphics2D) g.create();
+        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, ea.getBallOpacity()));
+        int x = ea.getX() - ea.getWidth();
+        int y = ea.getY() - ea.getWidth();
+        int diameter = ea.getWidth()*2;
 
-        g2d.setColor(Color.WHITE);
-        //Ellipse2D.Double circle = new Ellipse2D.Double(ea.getX(), ea.getY(), ea.getWidth(), ea.getWidth());
-        //g2d.draw(circle);
+        if (c.equals(Color.WHITE) && Float.compare(ea.getBallOpacity(), 1f) < 0) {
+            g2d.setColor(c);
+            Arc2D.Double attack = new Arc2D.Double(x, y, diameter, diameter,90, (ea.getDirX() == -1) ? -180 : 180, Arc2D.OPEN);
+            g2d.fill(attack);
 
-        g2d.drawOval(ea.getX() - ea.getWidth(), ea.getY() - ea.getWidth(), ea.getWidth()*2, ea.getWidth()*2);
-
+        } else {
+            g2d.setColor(Color.WHITE);
+            g2d.drawOval(x, y, diameter, diameter);
+            g2d.setColor(c);
+            g2d.fillOval(x, y, diameter, diameter);
+        }
         g2d.dispose();
     }
 
@@ -122,6 +128,15 @@ public class AssaultView {
         g2d.setColor(Color.WHITE);
         Ellipse2D.Double ee = new Ellipse2D.Double(e.getXOrd(),e.getYOrd() - 10,e.getLength(),5);
         g2d.draw(ee);
+        g2d.dispose();
+    }
+
+    public void drawLaser(Graphics g, EnemyAttack ea) {
+        Graphics2D g2d = (Graphics2D) g.create();
+        g2d.setColor(Color.WHITE);
+        float alpha = (ea.getOpacity() < 0f) ? 0f : (ea.getOpacity() > 1f) ? 1f : ea.getOpacity();
+        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
+        g2d.fill(ea.getLaserBounds());
         g2d.dispose();
     }
 }
