@@ -1,37 +1,14 @@
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.Random;
-import javax.swing.Timer;
-
 public class EnemyControl {
     private AssaultModel am;
     private Enemy e;
     private EnemyAttackControl eac;
     private int currentAttack; // ensures current progresses until end
-    private Timer attackCD;
-    private Random rand;
 
     public EnemyControl(AssaultModel am, Enemy e, EnemyAttackControl eac) {
         this.am = am;
         this.e = e;
         this.eac = eac;
         this.currentAttack = 0;
-        this.rand = new Random();
-        initAttackTimer();
-    }
-
-    /**
-     * Cooldown for attacks
-     */
-    private void initAttackTimer() {
-        this.attackCD = new Timer(1500, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent ee) {
-                attackCD.setDelay(rand.nextInt(5000 - 3000 + 1) + 3000);
-                e.setAttacking(true);       // ensures enemy only attacks after timer delay
-            }
-        });
-        this.attackCD.start();
     }
 
     public void move() {
@@ -72,18 +49,21 @@ public class EnemyControl {
 
     private void stopAtRightWall() {
         if (e.getXOrd() + e.getLength() < am.GAME_LENGTH) return;
-        currentAttack = 0;
+        currentAttack = (currentAttack == 8) ? 8 : 0;
         eac.endAttack();
         e.setXOrd(am.GAME_LENGTH - e.getLength() - 1);
         e.setVelX(0);
+        if (e.getYOrd() + e.getHeight() < am.PLATFORM_Y) e.setVelY(e.getVel()*3);
     }
 
     private void stopAtLeftWall() {
         if (e.getXOrd() > 0) return;
-        currentAttack = 0;
+        currentAttack = (currentAttack == 8) ? 8 : 0;
         eac.endAttack();
         e.setXOrd(1);
         e.setVelX(0);
+        if (e.getYOrd() + e.getHeight() < am.PLATFORM_Y) e.setVelY(e.getVel()*3);
+
     }
 
     private void performAttack() {
@@ -91,11 +71,4 @@ public class EnemyControl {
 
     }
 
-    public void stopAttackTimer() {
-        this.attackCD.stop();
-    }
-
-    public void startAttackTimer() {
-        this.attackCD.start();
-    }
 }

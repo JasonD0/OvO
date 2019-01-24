@@ -41,13 +41,6 @@ public class AssaultView {
         g2d.setColor(e.getColor());
         g2d.fill(entity);
 
-        g2d.setColor(Color.BLUE);
-
-        //extent  90 = half of arc   180 = full arc  360 = ellipse
-        /*Arc2D.Double attack = new Arc2D.Double(200, 200, 150, 10,
-                90, -90, Arc2D.OPEN);
-        g2d.draw(attack); */   // change extent from 0 to -180
-
         if (!e.isDead()) drawHealth(g, e);
         else drawHalo(g, e);
 
@@ -74,23 +67,29 @@ public class AssaultView {
         g2d.dispose();
     }
 
-    public void drawBallAttack(Graphics g, EnemyAttack ea, Color c) {
+    /**
+     *
+     * @param g
+     * @param ea
+     * @param fill    false for outline
+     */
+    public void drawBallAttack(Graphics g, EnemyAttack ea, boolean fill) {
         Graphics2D g2d = (Graphics2D) g.create();
         g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, ea.getBallOpacity()));
         int x = ea.getX() - ea.getWidth();
         int y = ea.getY() - ea.getWidth();
         int diameter = ea.getWidth()*2;
 
-        if (c.equals(Color.WHITE) && Float.compare(ea.getBallOpacity(), 1f) < 0) {
-            g2d.setColor(c);
+        g2d.setColor(Color.WHITE);
+        // draw arc for laser when laser begins fading
+        if (fill && Float.compare(ea.getBallOpacity(), 1f) < 0) {
             Arc2D.Double attack = new Arc2D.Double(x, y, diameter, diameter,90, (ea.getDirX() == -1) ? -180 : 180, Arc2D.OPEN);
             g2d.fill(attack);
 
+        // draw ball
         } else {
-            g2d.setColor(Color.WHITE);
             g2d.drawOval(x, y, diameter, diameter);
-            g2d.setColor(c);
-            g2d.fillOval(x, y, diameter, diameter);
+            if (fill) g2d.fillOval(x, y, diameter, diameter);
         }
         g2d.dispose();
     }
@@ -98,11 +97,7 @@ public class AssaultView {
     public void drawShockwave(Graphics g, List<Obstacle> shockwave, Color c) {
         Graphics2D g2d = (Graphics2D) g.create();
         g2d.setColor(c);
-
-        for (Obstacle o : shockwave) {
-            g2d.fill(o.getBounds());
-        }
-
+        for (Obstacle o : shockwave) g2d.fill(o.getBounds());
         g2d.create();
     }
 

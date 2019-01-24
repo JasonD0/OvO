@@ -31,10 +31,10 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
         this.p = new Player(100, am.PLATFORM_Y - 25, 25, 25, 0,0, 100, Color.BLACK);
         this.e = new Enemy(1300, am.PLATFORM_Y - 50, 50, 50, 0, 0, 100, Color.WHITE);
         this.playerAttack = new Attack();
-        this.eac = new EnemyAttackControl(e);
         this.am = new AssaultModel(p, e);
         this.av = new AssaultView();
         this.pc = new PlayerControl(am, p, playerAttack);
+        this.eac = new EnemyAttackControl(e);
         this.ec = new EnemyControl(am, e, eac);
         this.obstacles = new ArrayList<>();
         init();
@@ -92,11 +92,8 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
         if (e.isWaiting()) growShockwave();
         if (isCollided() && !p.isDamaged()) pc.takeDamage();
         if (eac.attackCollision(p) && !p.isDamaged()) {
-            if (eac.getCurrentAttack() == 7 && !p.isKnockedBack()) {
-                pc.knockBack(new Point(e.getXOrd(), e.getYOrd()));
-            }
+            if (eac.getCurrentAttack() == 7 && !p.isKnockedBack()) pc.knockBack(new Point(e.getXOrd(), e.getYOrd()));
             pc.takeDamage();
-            System.out.println(p.getHealth());
         }
         if (enemyHit() && !e.isDamaged()) ec.takeDamage();
         if (playerAttack.isCompleted()) e.setDamaged(false);
@@ -166,8 +163,7 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
     }
 
     private void drawEnemyAttack(Graphics g) {
-        Color c = (eac.getCurrentAttack() == 8) ? Color.WHITE : am.LIGHT_GRAY;
-        av.drawBallAttack(g, eac.getEnemyAttack(), c);
+        av.drawBallAttack(g, eac.getEnemyAttack(), (eac.getCurrentAttack() == 8) ? true : false);
         if (eac.getCurrentAttack() == 8) av.drawLaser(g, eac.getEnemyAttack());
     }
 
@@ -183,10 +179,10 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
             boolean paused = (am.isPaused()) ? false : true;
             am.setPaused(paused);
             if (paused) {
-                ec.stopAttackTimer();
+                eac.stopAttackTimer();
                 gameTimer.stop();
             } else {
-                ec.startAttackTimer();
+                eac.startAttackTimer();
                 gameTimer.start();
             }
 

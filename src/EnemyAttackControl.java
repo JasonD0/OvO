@@ -1,14 +1,18 @@
 import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Random;
+import javax.swing.Timer;
 
 public class EnemyAttackControl {
-    private final static int NUM_ATTACKS = 6;
+    private final static int NUM_ATTACKS = 9;
     private Enemy e;
     private Random rand;
     private int directionX, directionY;
     private Point playerPos, startPos;  // saves starting co-ordinates of the attack for both
     private boolean flag;   // helper flags for attacks
     private EnemyAttack ea;
+    private Timer attackCD;
     private int currentAttack;
 
     public EnemyAttackControl(Enemy e) {
@@ -17,6 +21,22 @@ public class EnemyAttackControl {
         this.rand = new Random();
         this.flag = false;
         this.currentAttack = 0;
+        initAttackTimer();
+    }
+
+    /**
+     * Cooldown for attacks
+     */
+    private void initAttackTimer() {
+        this.attackCD = new Timer(1500, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ee) {
+                attackCD.setDelay(rand.nextInt(5000 - 3000 + 1) + 3000);
+                e.setAttacking(true);       // ensures enemy only attacks after timer delay
+                attackCD.stop();
+            }
+        });
+        this.attackCD.start();
     }
 
     public EnemyAttack getEnemyAttack() {
@@ -34,8 +54,7 @@ public class EnemyAttackControl {
         if (playerPos == null) setDirection(pos);
         if (startPos == null) startPos = new Point(e.getXOrd(), e.getYOrd());
 
-        //currentAttack = (attack == 0) ? rand.nextInt(NUM_ATTACKS) + 1 : attack;
-        currentAttack = 8;
+        currentAttack = (attack == 0) ? rand.nextInt(NUM_ATTACKS) + 1 : attack;
 
         switch (currentAttack) {
             case 1: rollAttack(); break;
@@ -46,6 +65,7 @@ public class EnemyAttackControl {
             case 6: energyBall(); break;
             case 7: pulse(); break;
             case 8: laser(); break;
+            case 9: bounce(); break;
         }
 
         return currentAttack;
@@ -60,7 +80,8 @@ public class EnemyAttackControl {
      * @param pos
      */
     private void setDirection(Point pos) {
-        playerPos = pos;
+        this.playerPos = pos;
+        this.startPos = null;
         this.directionX = (playerPos.getX() < e.getXOrd()) ? -1 : 1;
         this.directionY = (playerPos.getY() < e.getYOrd()) ? -1 : 1;
         ea.setDirX(directionX);
@@ -71,12 +92,14 @@ public class EnemyAttackControl {
         ea.setCharging(false);
         ea.setOpacity(0f);
         ea.setBallOpacity(1f);
+        ea.initBall(0,0,0,0);
         playerPos = null;
         startPos = null;
         flag = false;
         e.setAngle(0);
         e.setVelX(0);
         e.setVelY(0);
+        attackCD.start();
     }
 
     private void moveTowardsPlayer() {
@@ -181,12 +204,12 @@ public class EnemyAttackControl {
     private void snailIncreaseLength() {
         e.setVelX(0);
         // reduce length when reach left/right wall
-        if (e.getXOrd() - e.getVel()*2 <= 0 || e.getXOrd() + e.getLength() + e.getVel()*2 >= 1484) {
+        if (e.getXOrd() - e.getVel()*2 <= 0 || e.getXOrd() + e.getLength() + e.getVel() >= 1484) {
             flag = true;
             return;
         }
-        if (directionX == -1) e.setVelX(directionX*e.getVel()*2);
-        e.setLength(e.getLength() + e.getVel()*2);
+        if (directionX == -1) e.setVelX(directionX*e.getVel());
+        e.setLength(e.getLength() + e.getVel());
     }
 
     /**
@@ -251,10 +274,7 @@ public class EnemyAttackControl {
                 ea.initBall(e.getXOrd() + e.getLength()/2, e.getYOrd() + e.getHeight()/2, 2, 0);
 
             } else {
-                if (ea.getWidth() >= 450) {
-                    ea.initBall(0, 0, 0, 0);
-                    endAttack();
-                }
+                if (ea.getWidth() >= 450) endAttack();
                 else if (ea.getWidth() < 150) ea.chargeBall(5);
                 else ea.chargeBall(10);
             }
@@ -290,7 +310,34 @@ public class EnemyAttackControl {
         }
     }
 
+    /**
+     * Bounce up and down until reach a wall
+     */
+    private void bounce() {
+        e.setVelX((e.getVel()/2)*directionX);
+
+        // bounce down when hit ceiling
+        if (e.getYOrd() <= 0) e.setVelY(e.getVel()*3);
+
+        // bounce up when hit platform
+        else if (e.getYOrd() + e.getHeight() >= AssaultModel.PLATFORM_Y) {
+            e.setYOrd(AssaultModel.PLATFORM_Y - e.getHeight() - 10);
+            e.setVelY(-e.getVel()*3);
+        }
+    }
+
+
+
     public boolean attackCollision(Player p) {
-        return (p.getBoundary().intersects(ea.getBallBounds()) || p.getBoundary().intersects(ea.getLaserBounds()) && ea.getOpacity() > 0);
+        return p.getBoundary().intersects(ea.getBallBounds()) ||
+                (p.getBoundary().intersects(ea.getLaserBounds()) && ea.getOpacity() > 0);
+    }
+
+    public void stopAttackTimer() {
+        this.attackCD.stop();
+    }
+
+    public void startAttackTimer() {
+        this.attackCD.start();
     }
 }
