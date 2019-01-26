@@ -70,26 +70,28 @@ public class AssaultView {
     /**
      *
      * @param g
-     * @param ea
+     * @param components
      * @param fill    false for outline
      */
-    public void drawBallAttack(Graphics g, EnemyAttack ea, boolean fill) {
+    public void drawBallAttack(Graphics g, List<EnemyAttack> components, boolean fill) {
         Graphics2D g2d = (Graphics2D) g.create();
-        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, ea.getBallOpacity()));
-        int x = ea.getX() - ea.getWidth();
-        int y = ea.getY() - ea.getWidth();
-        int diameter = ea.getWidth()*2;
+        for (EnemyAttack ea : components) {
+            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, ea.getBallOpacity()));
+            int x = ea.getX() - ea.getWidth();
+            int y = ea.getY() - ea.getWidth();
+            int diameter = ea.getWidth() * 2;
 
-        g2d.setColor(Color.WHITE);
-        // draw arc for laser when laser begins fading
-        if (fill && Float.compare(ea.getBallOpacity(), 1f) < 0) {
-            Arc2D.Double attack = new Arc2D.Double(x, y, diameter, diameter,90, (ea.getDirX() == -1) ? -180 : 180, Arc2D.OPEN);
-            g2d.fill(attack);
+            g2d.setColor(Color.WHITE);
+            // draw arc for laser when laser begins fading
+            if (fill && Float.compare(ea.getBallOpacity(), 1f) < 0) {
+                Arc2D.Double attack = new Arc2D.Double(x, y, diameter, diameter, 90, (ea.getDirX() == -1) ? -180 : 180, Arc2D.OPEN);
+                g2d.fill(attack);
 
-        // draw ball
-        } else {
-            g2d.drawOval(x, y, diameter, diameter);
-            if (fill) g2d.fillOval(x, y, diameter, diameter);
+            // draw ball
+            } else {
+                g2d.drawOval(x, y, diameter, diameter);
+                if (fill) g2d.fillOval(x, y, diameter, diameter);
+            }
         }
         g2d.dispose();
     }
@@ -126,12 +128,14 @@ public class AssaultView {
         g2d.dispose();
     }
 
-    public void drawLaser(Graphics g, EnemyAttack ea) {
+    public void drawLaser(Graphics g, List<EnemyAttack> components) {
         Graphics2D g2d = (Graphics2D) g.create();
         g2d.setColor(Color.WHITE);
-        float alpha = (ea.getOpacity() < 0f) ? 0f : (ea.getOpacity() > 1f) ? 1f : ea.getOpacity();
-        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
-        g2d.fill(ea.getLaserBounds());
+        for (EnemyAttack ea : components) {
+            float alpha = (ea.getOpacity() < 0f) ? 0f : (ea.getOpacity() > 1f) ? 1f : ea.getOpacity();
+            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
+            g2d.fill(ea.getLaserBounds());
+        }
         g2d.dispose();
     }
 }

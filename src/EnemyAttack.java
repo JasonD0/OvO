@@ -1,4 +1,5 @@
 import java.awt.Rectangle;
+import java.awt.geom.Rectangle2D;
 
 public class EnemyAttack {
     private int x, y;
@@ -8,12 +9,14 @@ public class EnemyAttack {
     private boolean charging;
     private float opacity, ballOpacity;
     private int dirX;
+    private int repeat;
 
     public EnemyAttack() {
         this.charging = false;
         this.opacity = 0f;
         this.ballOpacity = 1f;
         this.dirX = 1;
+        this.repeat = 1;
     }
 
     public int getX() {
@@ -103,5 +106,13 @@ public class EnemyAttack {
 
     public int getDirX() {
         return this.dirX;
+    }
+
+    public void setRepeat(int numRepeat) {
+        this.repeat = numRepeat;
+    }
+
+    public int getRepeat() {
+        return this.repeat;
     }
 }

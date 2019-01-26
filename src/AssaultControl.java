@@ -90,11 +90,12 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
         if (am.isPaused()) return;
         requestFocusInWindow();
         if (e.isWaiting()) growShockwave();
-        if (isCollided() && !p.isDamaged()) pc.takeDamage();
-        if (eac.attackCollision(p) && !p.isDamaged()) {
-            if (eac.getCurrentAttack() == 7 && !p.isKnockedBack()) pc.knockBack(new Point(e.getXOrd(), e.getYOrd()));
-            pc.takeDamage();
+        if (eac.attackCollision(p)) {
+            int a = eac.getCurrentAttack();
+            if ((a == 7  || a == 11) && !p.isKnockedBack()) pc.knockBack(new Point(e.getXOrd(), e.getYOrd()));
+            if (!p.isDamaged()) pc.takeDamage();
         }
+        if (isCollided() && !p.isDamaged()) pc.takeDamage();
         if (enemyHit() && !e.isDamaged()) ec.takeDamage();
         if (playerAttack.isCompleted()) e.setDamaged(false);
         pc.move();
@@ -159,12 +160,12 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
         av.drawEntity(g, e, null);
         if (e.isWaiting()) av.drawShockwave(g, obstacles, am.AQUA);
         av.drawEntity(g, p, playerAttack);
-        if (eac.getEnemyAttack().isCharging()) drawEnemyAttack(g);
+        if (eac.isAttacking()) drawEnemyAttack(g);
     }
 
     private void drawEnemyAttack(Graphics g) {
-        av.drawBallAttack(g, eac.getEnemyAttack(), (eac.getCurrentAttack() == 8) ? true : false);
-        if (eac.getCurrentAttack() == 8) av.drawLaser(g, eac.getEnemyAttack());
+        av.drawBallAttack(g, eac.getAttackComponents(), (eac.getCurrentAttack() == 8) ? true : false);
+        if (eac.getCurrentAttack() == 8) av.drawLaser(g, eac.getAttackComponents());
     }
 
     @Override

@@ -112,8 +112,7 @@ public class PlayerControl {
         enemyPos = (pos == null) ? enemyPos : pos;
         startPos = (pos == null) ? startPos : new Point(p.getXOrd(), p.getYOrd());
         if (p.getYOrd() + p.getHealth() < am.PLATFORM_Y) p.setYOrd(getLinearY(p.getXOrd(), (int) enemyPos.getX(), (int) enemyPos.getY()));
-        if (p.getXOrd() > enemyPos.getX()) p.setVelX(p.getMoveVel()*2);
-        else if (p.getXOrd() == enemyPos.getX()) p.setVelX(0);
+        if (p.getXOrd() >= enemyPos.getX()) p.setVelX(p.getMoveVel()*2);
         else p.setVelX(-p.getMoveVel()*2);
     }
 
