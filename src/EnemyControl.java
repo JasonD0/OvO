@@ -48,6 +48,7 @@ public class EnemyControl {
     }
 
     private void stopAtRightWall() {
+        if (e.getLength() != e.getStartLength()) return;
         if (e.getXOrd() + e.getLength() < am.GAME_LENGTH) return;
         currentAttack = (currentAttack == 8) ? 8 : 0;
         eac.endAttack();
@@ -57,6 +58,7 @@ public class EnemyControl {
     }
 
     private void stopAtLeftWall() {
+        if (e.getLength() != e.getStartLength()) return;
         if (e.getXOrd() > 0) return;
         currentAttack = (currentAttack == 8) ? 8 : 0;
         eac.endAttack();

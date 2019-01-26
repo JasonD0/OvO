@@ -76,7 +76,7 @@ public class EnemyAttackControl {
         if (startPos == null) startPos = new Point(e.getXOrd(), e.getYOrd());
 
         currentAttack = (attack == 0) ? rand.nextInt(NUM_ATTACKS) + 1 : attack;
-//        currentAttack = 11;
+//        currentAttack = 4;
 
         switch (currentAttack) {
             case 1: rollAttack(); break;
@@ -90,6 +90,7 @@ public class EnemyAttackControl {
             case 9: bounce(); break;
             case 10: ballSmash(); break;
             case 11: crash(); break;
+            case 12: ballBarrage(); break;
         }
 
         return currentAttack;
@@ -105,7 +106,7 @@ public class EnemyAttackControl {
      */
     private void setDirection(Point pos) {
         this.playerPos = pos;
-        this.startPos = null;
+        //this.startPos = null;
         this.directionX = (playerPos.getX() < e.getXOrd()) ? -1 : 1;
         this.directionY = (playerPos.getY() < e.getYOrd()) ? -1 : 1;
         for (EnemyAttack ea : attackComponents) ea.setDirX(directionX);
@@ -200,8 +201,13 @@ public class EnemyAttackControl {
             snailIncreaseLength();
 
         // move towards player
-        } else {
+        } else if (e.getLength() == e.getStartLength()) {
             moveTowardsPlayer();
+
+        // temporary bug fix      dashing during snail attack
+        // when length is not 400 and gap between saved player position and enemy is > 200
+        } else {
+            snailReduceLength();
         }
     }
 
@@ -225,7 +231,9 @@ public class EnemyAttackControl {
     private void snailIncreaseLength() {
         e.setVelX(0);
         // reduce length when reach left/right wall
-        if (e.getXOrd() - e.getVel()*2 <= 0 || e.getXOrd() + e.getLength() + e.getVel() >= 1484) {
+        if (e.getXOrd() <= 0 || e.getXOrd() + e.getLength() >= AssaultModel.GAME_LENGTH) {
+            if (e.getXOrd() <= 0) e.setXOrd(1);
+            else e.setXOrd(AssaultModel.GAME_LENGTH - e.getLength() - 1);
             flag = true;
             return;
         }
@@ -363,11 +371,12 @@ public class EnemyAttackControl {
             // create ball
             if (!ea.isCharging()) {
                 ea.setCharging(true);
-                ea.initBall(e.getXOrd() + e.getLength()/2, e.getYOrd() - 150, 2, 17);
+                ea.initBall(e.getXOrd() + e.getLength()/2, e.getYOrd() - 150, 2, 0);
                 startPos = new Point(ea.getX(), ea.getY());
 
             // increase ball size
             } else if (ea.getWidth() <= 50) {
+                ea.setVelX(0);
                 ea.chargeBall(2);
 
             } else if (ea.getY() + ea.getWidth() >= AssaultModel.PLATFORM_Y) {
@@ -382,6 +391,7 @@ public class EnemyAttackControl {
                     return;
                 }
             }
+            if (ea.getWidth() > 50) ea.setVelX(20);
             ea.setX(ea.getX() + ea.getVelX()*directionX);
             ea.setY(getBallParabolicY(ea));
 
@@ -424,6 +434,11 @@ public class EnemyAttackControl {
         } else if (!this.attackDelay.isRunning()) {
             e.setVelY(25);
         }
+    }
+
+
+    private void ballBarrage() {
+
     }
 
 
