@@ -1,12 +1,9 @@
 import java.awt.Point;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.util.HashMap;
 import javax.swing.Timer;
 
 public class PlayerControl {
-    private AssaultModel am;
     private Timer attackCD, dashCD, damageCD;
     private Player p;
     private Attack attack;
@@ -14,8 +11,7 @@ public class PlayerControl {
     private HashMap<Integer, Boolean> pressedKeys;
     private Point enemyPos, startPos;
 
-    public PlayerControl(AssaultModel am, Player p, Attack a) {
-        this.am = am;
+    public PlayerControl(Player p, Attack a) {
         this.p = p;
         this.attack = a;
         this.pressedKeys = new HashMap<>();
@@ -29,36 +25,23 @@ public class PlayerControl {
      */
     private void initAttackTimer() {
         // pressing X only registers every 0.45 seconds
-        this.attackCD = new Timer(450, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                attackCD.stop();
-            }
-        });
+        this.attackCD = new Timer(450, e -> attackCD.stop());
     }
 
     /**
      * Cooldown for dashing
      */
     private void initDashTimer() {
-        this.dashCD = new Timer(750, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                dashCD.stop();
-            }
-        });
+        this.dashCD = new Timer(750, e -> dashCD.stop());
     }
 
     /**
      * Cooldown for taking damage
      */
     private void initDamageTimer() {
-        this.damageCD = new Timer(1000, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                p.setDamaged(false);
-                damageCD.stop();
-            }
+        this.damageCD = new Timer(1000, e -> {
+            p.setDamaged(false);
+            damageCD.stop();
         });
     }
 
@@ -111,7 +94,8 @@ public class PlayerControl {
         p.setKnockedBack(true);
         enemyPos = (pos == null) ? enemyPos : pos;
         startPos = (pos == null) ? startPos : new Point(p.getXOrd(), p.getYOrd());
-        if (p.getYOrd() + p.getHealth() < am.PLATFORM_Y) p.setYOrd(getLinearY(p.getXOrd(), (int) enemyPos.getX(), (int) enemyPos.getY()));
+        if (p.getYOrd() + p.getHealth() < AssaultModel.PLATFORM_Y)
+            p.setYOrd(getLinearY(p.getXOrd(), (int) enemyPos.getX(), (int) enemyPos.getY()));
         if (p.getXOrd() >= enemyPos.getX()) p.setVelX(p.getMoveVel()*2);
         else p.setVelX(-p.getMoveVel()*2);
     }
@@ -139,7 +123,7 @@ public class PlayerControl {
      * Prevent player from jumping higher than the maximum jump
      */
     private void stopAtMaxJump() {
-        if (am.PLATFORM_Y - p.getYOrd() < p.getMaxJump() || p.isDashing() || p.isKnockedUp()) return;
+        if (AssaultModel.PLATFORM_Y - p.getYOrd() < p.getMaxJump() || p.isDashing() || p.isKnockedUp()) return;
         p.setVelY(p.getMoveVel());
         p.setFalling(true);
     }
@@ -148,8 +132,8 @@ public class PlayerControl {
      * Prevent player from falling below the platform
      */
     private void stopOnPlatform() {
-        if (p.getYOrd() <= am.PLATFORM_Y - p.getHeight()) return;
-        p.setYOrd(am.PLATFORM_Y - p.getHeight());
+        if (p.getYOrd() <= AssaultModel.PLATFORM_Y - p.getHeight()) return;
+        p.setYOrd(AssaultModel.PLATFORM_Y - p.getHeight());
         p.setVelY(0);
         p.setFalling(false);
         p.setKnockedUp(false);
@@ -163,7 +147,7 @@ public class PlayerControl {
         if (p.getXOrd() > 0) return;
         p.setXOrd(1);
         p.setVelX(0);
-        if (p.getYOrd() + p.getHeight() < am.PLATFORM_Y) p.setVelY(p.getMoveVel());
+        if (p.getYOrd() + p.getHeight() < AssaultModel.PLATFORM_Y) p.setVelY(p.getMoveVel());
         p.setDashing(false);
         p.setKnockedBack(false);
     }
@@ -172,10 +156,10 @@ public class PlayerControl {
      * Prevent player from moving past the right wall
      */
     private void stopAtRightWall() {
-        if (p.getXOrd() + p.getLength() < am.GAME_LENGTH) return;
-        p.setXOrd(am.GAME_LENGTH - p.getLength() - 1);
+        if (p.getXOrd() + p.getLength() < AssaultModel.GAME_LENGTH) return;
+        p.setXOrd(AssaultModel.GAME_LENGTH - p.getLength() - 1);
         p.setVelX(0);
-        if (p.getYOrd() + p.getHeight() < am.PLATFORM_Y) p.setVelY(p.getMoveVel());
+        if (p.getYOrd() + p.getHeight() < AssaultModel.PLATFORM_Y) p.setVelY(p.getMoveVel());
         p.setDashing(false);
         p.setKnockedBack(false);
     }
@@ -188,7 +172,7 @@ public class PlayerControl {
         p.setVelX(0);
         p.setDashing(false);
         // let player fall if player dashed in the air
-        if (p.getYOrd() + p.getHeight() < am.PLATFORM_Y) {
+        if (p.getYOrd() + p.getHeight() < AssaultModel.PLATFORM_Y) {
             p.setFalling(true);
             p.setVelY(p.getMoveVel());
         }
@@ -198,7 +182,7 @@ public class PlayerControl {
      * Move the player in the right direction
      */
     private void moveRight() {
-        if (p.getXOrd() + p.getLength() >= am.GAME_LENGTH - 1) return;
+        if (p.getXOrd() + p.getLength() >= AssaultModel.GAME_LENGTH - 1) return;
         if (!isKeyPressed(KeyEvent.VK_RIGHT) || isKeyPressed(KeyEvent.VK_C)) return;
         p.setVelX(p.getMoveVel());
         p.setDirection("E");

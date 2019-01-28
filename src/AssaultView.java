@@ -138,4 +138,24 @@ public class AssaultView {
         }
         g2d.dispose();
     }
+
+    public void drawRectangularAttack(Graphics g, List<EnemyAttack> components) {
+        for (EnemyAttack ea : components) {
+            Graphics2D g2d = (Graphics2D) g.create();
+            g2d.setColor(AssaultModel.AQUA);
+            g2d.rotate(Math.toRadians(ea.getAngle()), ea.getX(), ea.getY());
+            g2d.fill(new Rectangle(ea.getX(), ea.getY(), ea.getWidth(), ea.getHeight()));
+            g2d.dispose();
+        }
+    }
+
+    public void drawMagicCircle(Graphics g, Enemy e) {
+        Graphics2D g2d = (Graphics2D) g.create();
+        g2d.setColor(Color.CYAN);
+        int x = e.getXOrd() + e.getLength()/2 + e.getDirX()*(e.getLength()/2 + 15);
+        int y = e.getYOrd();
+        Ellipse2D.Double circle = new Ellipse2D.Double(x, y, 5, e.getHeight());
+        g2d.draw(circle);
+        g2d.dispose();
+    }
 }

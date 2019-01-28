@@ -33,9 +33,9 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
         this.playerAttack = new Attack();
         this.am = new AssaultModel(p, e);
         this.av = new AssaultView();
-        this.pc = new PlayerControl(am, p, playerAttack);
+        this.pc = new PlayerControl(p, playerAttack);
         this.eac = new EnemyAttackControl(e);
-        this.ec = new EnemyControl(am, e, eac);
+        this.ec = new EnemyControl(am, e, eac, av);
         this.obstacles = new ArrayList<>();
         init();
     }
@@ -71,12 +71,9 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
     }
 
     private void initGameTimer() {
-        gameTimer = new Timer(1000, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                am.updateCounter();
-                //System.out.println(am.getTime());
-            }
+        gameTimer = new Timer(1000, e -> {
+            am.updateCounter();
+            //System.out.println(am.getTime());
         });
         gameTimer.start();
     }
@@ -160,12 +157,7 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
         av.drawEntity(g, e, null);
         if (e.isWaiting()) av.drawShockwave(g, obstacles, am.AQUA);
         av.drawEntity(g, p, playerAttack);
-        if (eac.isAttacking()) drawEnemyAttack(g);
-    }
-
-    private void drawEnemyAttack(Graphics g) {
-        av.drawBallAttack(g, eac.getAttackComponents(), (eac.getCurrentAttack() == 8) ? true : false);
-        if (eac.getCurrentAttack() == 8) av.drawLaser(g, eac.getAttackComponents());
+        ec.paintComponent(g);
     }
 
     @Override
@@ -177,7 +169,7 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
     @Override
     public void keyReleased(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_P) {
-            boolean paused = (am.isPaused()) ? false : true;
+            boolean paused = !am.isPaused();
             am.setPaused(paused);
             if (paused) {
                 eac.stopAttackTimer();

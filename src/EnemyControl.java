@@ -1,14 +1,19 @@
-public class EnemyControl {
+import java.awt.Graphics;
+import javax.swing.JPanel;
+
+public class EnemyControl extends JPanel {
     private AssaultModel am;
     private Enemy e;
     private EnemyAttackControl eac;
+    private AssaultView av;
     private int currentAttack; // ensures current progresses until end
 
-    public EnemyControl(AssaultModel am, Enemy e, EnemyAttackControl eac) {
+    public EnemyControl(AssaultModel am, Enemy e, EnemyAttackControl eac, AssaultView av) {
         this.am = am;
         this.e = e;
         this.eac = eac;
         this.currentAttack = 0;
+        this.av = av;
     }
 
     public void move() {
@@ -50,7 +55,7 @@ public class EnemyControl {
     private void stopAtRightWall() {
         if (e.getLength() != e.getStartLength()) return;
         if (e.getXOrd() + e.getLength() < am.GAME_LENGTH) return;
-        currentAttack = (currentAttack == 8) ? 8 : 0;
+        currentAttack = 0;
         eac.endAttack();
         e.setXOrd(am.GAME_LENGTH - e.getLength() - 1);
         e.setVelX(0);
@@ -60,7 +65,7 @@ public class EnemyControl {
     private void stopAtLeftWall() {
         if (e.getLength() != e.getStartLength()) return;
         if (e.getXOrd() > 0) return;
-        currentAttack = (currentAttack == 8) ? 8 : 0;
+        currentAttack = 0;
         eac.endAttack();
         e.setXOrd(1);
         e.setVelX(0);
@@ -73,4 +78,13 @@ public class EnemyControl {
 
     }
 
+    @Override
+    public void paintComponent(Graphics g) {
+        if (currentAttack == 0) return;
+        if (e.isCasting()) av.drawMagicCircle(g, e);
+        if (currentAttack == 12) av.drawRectangularAttack(g, eac.getAttackComponents());
+        else av.drawBallAttack(g, eac.getAttackComponents(), (eac.getCurrentAttack() == 8) ? true : false);
+        if (currentAttack == 8) av.drawLaser(g, eac.getAttackComponents());
+
+    }
 }

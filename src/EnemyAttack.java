@@ -5,7 +5,7 @@ public class EnemyAttack {
     private int x, y;
     private int height, width;
     private int angle;
-    private int velX;
+    private int velX, velY;
     private boolean charging;
     private float opacity, ballOpacity;
     private int dirX;
@@ -17,6 +17,15 @@ public class EnemyAttack {
         this.ballOpacity = 1f;
         this.dirX = 1;
         this.repeat = 1;
+    }
+
+    public EnemyAttack(int x, int y, int l, int h, int v) {
+        this();
+        this.x = x;
+        this.y = y;
+        this.width = l;
+        this.height = h;
+        this.velY = v;
     }
 
     public int getX() {
@@ -55,6 +64,14 @@ public class EnemyAttack {
 
     public int getVelX() {
         return this.velX;
+    }
+
+    public void setVelY(int v) {
+        this.velY = v;
+    }
+
+    public int getVelY() {
+        return this.velY;
     }
 
     public void setCharging(boolean b) {
@@ -114,5 +131,17 @@ public class EnemyAttack {
 
     public int getRepeat() {
         return this.repeat;
+    }
+
+    public Rectangle getBounds() {
+        return new Rectangle(x, y, width, height);
+    }
+
+    public void setAngle(int angle) {
+        this.angle = angle;
+    }
+
+    public int getAngle() {
+        return this.angle;
     }
 }
