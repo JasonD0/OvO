@@ -153,8 +153,11 @@ public class AssaultView {
         Graphics2D g2d = (Graphics2D) g.create();
         g2d.setColor(Color.CYAN);
         int x = e.getXOrd() + e.getLength()/2 + e.getDirX()*(e.getLength()/2 + 15);
-        int y = e.getYOrd();
-        Ellipse2D.Double circle = new Ellipse2D.Double(x, y, 5, e.getHeight());
+        if (e.getDirX() == 0) x -= (e.getLength()/2 + 10);
+        int y = e.getYOrd() + ((e.getDirX() == 0) ? -25 : 0);
+        int w = (e.getDirX() == 0) ? e.getLength() + 20: 5;
+        int h = (e.getDirX() == 0) ? 5 : e.getHeight();
+        Ellipse2D.Double circle = new Ellipse2D.Double(x, y, w, h);
         g2d.draw(circle);
         g2d.dispose();
     }

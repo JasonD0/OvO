@@ -82,11 +82,12 @@ public class EnemyAttack {
         return this.charging;
     }
 
-    public void initBall(int x, int y, int radius, int velX) {
+    public void initBall(int x, int y, int radius, int velX, int velY) {
         this.x = x;
         this.y = y;
         this.width = radius;
         this.velX = velX;
+        this.velY = velY;
     }
 
     public void chargeBall(int increase) {

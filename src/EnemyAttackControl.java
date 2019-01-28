@@ -1,13 +1,11 @@
 import java.awt.Point;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import javax.swing.Timer;
 
 public class EnemyAttackControl {
-    private final static int NUM_ATTACKS = 12;
+    private final static int NUM_ATTACKS = 13;
     private Enemy e;
     private Random rand;
     private Point playerPos, startPos;  // saves starting co-ordinates of the attack for both
@@ -62,7 +60,7 @@ public class EnemyAttackControl {
         if (startPos == null) startPos = new Point(e.getXOrd(), e.getYOrd());
 
         currentAttack = (attack == 0) ? rand.nextInt(NUM_ATTACKS) + 1 : attack;
-        //currentAttack = 12;
+        //currentAttack = 13;
 
         switch (currentAttack) {
             case 1: rollAttack(); break;
@@ -77,6 +75,7 @@ public class EnemyAttackControl {
             case 10: ballSmash(); break;
             case 11: crash(); break;
             case 12: flush(); break;
+            case 13: rain(); break;
         }
 
         return currentAttack;
@@ -269,7 +268,7 @@ public class EnemyAttackControl {
             // create ball
             if (!ea.isCharging()) {
                 ea.setCharging(true);
-                ea.initBall(e.getXOrd() + e.getLength()/2 + e.getDirX()*(e.getLength()/2 + 35), e.getYOrd(), 2, 15);
+                ea.initBall(e.getXOrd() + e.getLength()/2 + e.getDirX()*(e.getLength()/2 + 35), e.getYOrd(), 2, 15, 0);
 
             // increase ball size and release
             } else {
@@ -292,7 +291,7 @@ public class EnemyAttackControl {
             e.setVelX(0);
             if (!ea.isCharging()) {
                 ea.setCharging(true);
-                ea.initBall(e.getXOrd() + e.getLength()/2, e.getYOrd() + e.getHeight()/2, 2, 0);
+                ea.initBall(e.getXOrd() + e.getLength()/2, e.getYOrd() + e.getHeight()/2, 2, 0, 0);
 
             } else {
                 if (ea.getWidth() >= pulseWidth) endAttack();
@@ -313,7 +312,7 @@ public class EnemyAttackControl {
         EnemyAttack ea = attackComponents.get(0);
         if (!ea.isCharging()) {
             ea.setCharging(true);
-            ea.initBall(e.getXOrd() + e.getLength()/2 + e.getDirX()*e.getLength(), e.getYOrd() + e.getHeight()/2, 2, 0);
+            ea.initBall(e.getXOrd() + e.getLength()/2 + e.getDirX()*e.getLength(), e.getYOrd() + e.getHeight()/2, 2, 0, 0);
 
         } else {
             // lower laser opacity
@@ -359,7 +358,7 @@ public class EnemyAttackControl {
             // create ball
             if (!ea.isCharging()) {
                 ea.setCharging(true);
-                ea.initBall(e.getXOrd() + e.getLength()/2, e.getYOrd() - 150, 2, 0);
+                ea.initBall(e.getXOrd() + e.getLength()/2, e.getYOrd() - 150, 2, 0, 0);
                 startPos = new Point(ea.getX(), ea.getY());
 
             // increase ball size
@@ -453,7 +452,7 @@ public class EnemyAttackControl {
                 EnemyAttack prevEa = (i != 0) ? attackComponents.get(i-1) : null;
                 if (ea.getY() + ea.getHeight() >= AssaultModel.PLATFORM_Y) continue; // stop when reach platform
                 // wait until previous pole reached the platform before moving
-                if (prevEa != null && prevEa.getY() + prevEa.getHeight() < AssaultModel.PLATFORM_Y) return;
+                if (prevEa != null && prevEa.getY() + prevEa.getHeight() < AssaultModel.PLATFORM_Y) continue;
                 ea.setY(ea.getY() + ea.getVelY());
                 moving = true;
             }
@@ -468,7 +467,55 @@ public class EnemyAttackControl {
     }
 
 
-    //private void
+
+    private void rain() {
+        e.setDirX(0);
+        // create multiple balls
+        if (attackComponents.size() == 1) {
+            attackComponents.clear();
+            for (int i = 0; i < rand.nextInt(20 - 10 + 1) + 10; i++) {
+                attackComponents.add(new EnemyAttack(e.getXOrd() + e.getLength() / 2, e.getYOrd() - 50, 0, 0, -20));
+            }
+
+        // balls fall
+        } else if (flag) {
+            boolean allReachedPlatform = true;
+            for (int i = 0; i < attackComponents.size(); i++) {
+                EnemyAttack ea = attackComponents.get(i);
+                EnemyAttack prevEa = (i == 0) ? null : attackComponents.get(i-1);
+                if (ea.getY() - ea.getWidth() >= AssaultModel.PLATFORM_Y) continue;
+                if (prevEa != null && prevEa.getY() < 100) continue;
+                ea.setY(ea.getY() + rand.nextInt(30 - 15 + 1) + 15);
+                allReachedPlatform = false;
+            }
+            if (allReachedPlatform) endAttack();
+
+        // shoot balls upwards
+        } else {
+            e.setCasting(true);
+            flag = true;
+            for (int i = 0; i < attackComponents.size(); i++) {
+                EnemyAttack ea = attackComponents.get(i);
+                EnemyAttack prevEa = (i == 0) ? null : attackComponents.get(i-1);
+                if (ea.getY() + ea.getWidth() < 0) {
+                    // TODO : make balls fall in specific range depending on current player position
+                    // +- width*2  to ensure balls wont fall outside frame
+                    int maxX = (int)playerPos.getX() - ea.getWidth()*2;
+                    int minX = (int)playerPos.getX() + ea.getWidth()*2;
+                    ea.setX(rand.nextInt((AssaultModel.GAME_LENGTH - ea.getWidth()*2) - (ea.getWidth()*2) + 1) + ea.getWidth()*2);
+                    ea.setY(rand.nextInt(-ea.getWidth()*2 + 400 + 1) - 400);
+                    continue;
+                }
+                if (prevEa != null && prevEa.getY() > 250) continue;
+
+                if (ea.getWidth() <= 20) ea.chargeBall(2);
+                else ea.setY(ea.getY() + ea.getVelY());
+                flag = false;
+                if (!flag) playerPos = null;
+            }
+        }
+
+    }
 
 
     // y= mx + b;
