@@ -60,7 +60,7 @@ public class EnemyAttackControl {
         if (startPos == null) startPos = new Point(e.getXOrd(), e.getYOrd());
 
         currentAttack = (attack == 0) ? rand.nextInt(NUM_ATTACKS) + 1 : attack;
-        //currentAttack = 12;
+        //currentAttack = 8;
 
         switch (currentAttack) {
             case 1: rollAttack(); break;
@@ -313,7 +313,7 @@ public class EnemyAttackControl {
         EnemyAttack ea = attackComponents.get(0);
         if (!ea.isCharging()) {
             ea.setCharging(true);
-            ea.initBall(e.getXOrd() + e.getLength()/2 + e.getDirX()*e.getLength(), e.getYOrd() + e.getHeight()/2, 2, 0, 0);
+            ea.initBall(e.getXOrd() + e.getLength()/2 + e.getDirX()*(e.getLength() + 10), e.getYOrd() + e.getHeight()/2, 2, 0, 0);
 
         } else {
             // lower laser opacity
@@ -446,10 +446,10 @@ public class EnemyAttackControl {
         e.setCasting(true);
         e.setVelX(0);
         attackComponents.clear();
-        for (int i = 0; i < rand.nextInt(15 - 5 + 1) + 5; i++) {
+        for (int i = 0; i < rand.nextInt(20 - 10 + 1) + 10; i++) {
             int x = e.getXOrd() + e.getLength()/2 + e.getDirX()*(e.getLength()/2 + i*80 + 150);
             int h = 400 - i*25;
-            attackComponents.add(new EnemyAttack(x, 0 - h,  20, h, 80));
+            attackComponents.add(new EnemyAttack(x, 0 - h,  20, h, 40));
         }
         startDelay(500); // wait 0.5 secs after circle is drawn to indicate this attack is coming
     }

@@ -75,5 +75,4 @@ public class Enemy extends Entity {
     public int getDirX() {
         return this.dirX;
     }
-
 }

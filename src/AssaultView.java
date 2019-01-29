@@ -1,6 +1,7 @@
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -10,22 +11,35 @@ import java.awt.geom.Ellipse2D;
 import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
+import javax.swing.SwingConstants;
 
 public class AssaultView {
-    public void drawPlatform(AssaultControl parent, int l, Color c, Color c1) {
+    public void drawPlatform(AssaultControl parent) {
         JLabel platform = new JLabel();
-        platform.setBorder(BorderFactory.createMatteBorder(20, 0, 0, 0, c));
-        platform.setMaximumSize(new Dimension(l, 20));
-        platform.setMinimumSize(new Dimension(l, 20));
-        platform.setPreferredSize(new Dimension(l,20));
-        platform.setBackground(c);
+        platform.setBorder(BorderFactory.createMatteBorder(20, 0, 0, 0, AssaultModel.AQUA));
+        platform.setMaximumSize(new Dimension(AssaultModel.GAME_LENGTH, 20));
+        platform.setMinimumSize(new Dimension(AssaultModel.GAME_LENGTH, 20));
+        platform.setPreferredSize(new Dimension(AssaultModel.GAME_LENGTH,20));
+        platform.setBackground(AssaultModel.LIGHT_GRAY);
         parent.add(platform);
-        JLabel ca = new JLabel();
-        ca.setBorder(BorderFactory.createMatteBorder(50, 0, 0, 0, c1));
-        ca.setMaximumSize(new Dimension(l, 50));
-        ca.setMinimumSize(new Dimension(l, 50));
-        ca.setPreferredSize(new Dimension(l,50));
-        parent.add(ca);
+    }
+
+    public void drawInstructions(AssaultControl parent) {
+        JLabel instructions = new JLabel("", SwingConstants.CENTER);
+        instructions.setFont(new Font(null, Font.BOLD, 20));
+        instructions.setMaximumSize(new Dimension(AssaultModel.GAME_LENGTH, 50));
+        instructions.setMinimumSize(new Dimension(AssaultModel.GAME_LENGTH, 50));
+        instructions.setPreferredSize(new Dimension(AssaultModel.GAME_LENGTH,50));
+        instructions.setBackground(AssaultModel.LIGHT_GRAY);
+        String s = "<html><font color='rgb(127, 255, 212)'>LEFT/RIGHT:</font> MOVE #SPACE# " +
+                "         <font color='rgb(127, 255, 212)'>Z:</font> JUMP #SPACE# " +
+                "         <font color='rgb(127, 255, 212)'>X:</font> ATTACK #SPACE# " +
+                "         <font color='rgb(127, 255, 212)'>C:</font> DASH #SPACE# " +
+                "         <font color='rgb(127, 255, 212)'>P:</font> PAUSE</html>";
+        s = s.replaceAll("#SPACE#",  "&emsp; &emsp; &emsp; &emsp; &emsp; &emsp;");
+        instructions.setText(s);
+        instructions.setForeground(Color.WHITE);
+        parent.add(instructions);
     }
 
     public void drawEntity(Graphics g, Entity e, Attack a) {

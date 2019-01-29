@@ -85,6 +85,5 @@ public class EnemyControl extends JPanel {
         if (currentAttack == 12) av.drawRectangularAttack(g, eac.getAttackComponents());
         else av.drawBallAttack(g, eac.getAttackComponents(), (eac.getCurrentAttack() == 8) ? true : false);
         if (currentAttack == 8) av.drawLaser(g, eac.getAttackComponents());
-
     }
 }

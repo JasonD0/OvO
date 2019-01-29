@@ -80,7 +80,8 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
 
     private void addPlatform() {
         add(Box.createRigidArea(new Dimension(0, am.PLATFORM_Y)));
-        av.drawPlatform(this, am.GAME_LENGTH, am.AQUA, am.LIGHT_GRAY);
+        av.drawPlatform(this);
+        av.drawInstructions(this);
     }
 
     private void actionPerformed() {
