@@ -60,7 +60,7 @@ public class EnemyAttackControl {
         if (startPos == null) startPos = new Point(e.getXOrd(), e.getYOrd());
 
         currentAttack = (attack == 0) ? rand.nextInt(NUM_ATTACKS) + 1 : attack;
-        //currentAttack = 13;
+        //currentAttack = 12;
 
         switch (currentAttack) {
             case 1: rollAttack(); break;
@@ -120,9 +120,9 @@ public class EnemyAttackControl {
      * Enemy rolls towards player until reaching a wall
      */
     private void rollAttack() {
-        e.setVelX(e.getDirX()*e.getVel());
+        e.setVelX(e.getDirX()*e.getVel()*2);
         e.setVelY(0);
-        e.setAngle((e.getAngle() + 10) % 360);
+        e.setAngle((e.getAngle() + 20) % 360);
     }
 
     /**
@@ -240,7 +240,7 @@ public class EnemyAttackControl {
             flag = true;
 
         // jump up when player in range
-        } else if (Math.abs(playerPos.getX() - e.getXOrd()) < 150) {
+        } else if (Math.abs(playerPos.getX() - e.getXOrd()) < 350) {
             e.setVelY(-e.getVel());
             e.setVelX(0);
 
@@ -288,7 +288,7 @@ public class EnemyAttackControl {
     private void pulse(int pulseWidth) {
         EnemyAttack ea = attackComponents.get(0);
         // flag true when crash attack
-        if (Math.abs(playerPos.getX() - e.getXOrd()) < 300 || flag) {
+        if (Math.abs(playerPos.getX() - e.getXOrd()) < 400 || flag) {
             e.setVelX(0);
             if (!ea.isCharging()) {
                 ea.setCharging(true);
@@ -434,36 +434,43 @@ public class EnemyAttackControl {
 
         // create poles
         else if (attackComponents.size() == 1) {
-            e.setCasting(true);
-            e.setVelX(0);
-            attackComponents.clear();
-            for (int i = 0; i < rand.nextInt(15 - 3 + 1) + 3; i++) {
-                int x = e.getXOrd() + e.getLength()/2 + e.getDirX()*(e.getLength()/2 + i*80 + 150);
-                int h = 400 - i*25;
-                attackComponents.add(new EnemyAttack(x, 0 - h,  20, h, 80));
-            }
-            startDelay(500); // wait 0.5 secs after circle is drawn to indicate this attack is coming
+            initPoles();
 
         // move poles
         } else if (!attackDelay.isRunning()) {
-            boolean moving = false;   // true if at least one pole moved
-            for (int i = 0; i < attackComponents.size(); i++) {
-                EnemyAttack ea = attackComponents.get(i);
-                EnemyAttack prevEa = (i != 0) ? attackComponents.get(i-1) : null;
-                if (ea.getY() + ea.getHeight() >= AssaultModel.PLATFORM_Y) continue; // stop when reach platform
-                // wait until previous pole reached the platform before moving
-                if (prevEa != null && prevEa.getY() + prevEa.getHeight() < AssaultModel.PLATFORM_Y) continue;
-                ea.setY(ea.getY() + ea.getVelY());
-                moving = true;
-            }
-            // delay end attack
-            if (!moving && !flag) {
-                flag = true;
-                startDelay(1000);
-            }
-            if (flag && !attackDelay.isRunning()) endAttack();
+            movePoles();
         }
+    }
 
+    private void initPoles() {
+        e.setCasting(true);
+        e.setVelX(0);
+        attackComponents.clear();
+        for (int i = 0; i < rand.nextInt(15 - 5 + 1) + 5; i++) {
+            int x = e.getXOrd() + e.getLength()/2 + e.getDirX()*(e.getLength()/2 + i*80 + 150);
+            int h = 400 - i*25;
+            attackComponents.add(new EnemyAttack(x, 0 - h,  20, h, 80));
+        }
+        startDelay(500); // wait 0.5 secs after circle is drawn to indicate this attack is coming
+    }
+
+    private void movePoles() {
+        boolean moving = false;   // true if at least one pole moved
+        for (int i = 0; i < attackComponents.size(); i++) {
+            EnemyAttack ea = attackComponents.get(i);
+            EnemyAttack prevEa = (i != 0) ? attackComponents.get(i-1) : null;
+            if (ea.getY() + ea.getHeight() >= AssaultModel.PLATFORM_Y) continue; // stop when reach platform
+            // wait until previous pole reached the platform before moving
+            if (prevEa != null && prevEa.getY() + prevEa.getHeight() < AssaultModel.PLATFORM_Y) continue;
+            ea.setY(ea.getY() + ea.getVelY());
+            moving = true;
+        }
+        // delay end attack
+        if (!moving && !flag) {
+            flag = true;
+            startDelay(1000);
+        }
+        if (flag && !attackDelay.isRunning()) endAttack();
     }
 
     /**
@@ -475,7 +482,7 @@ public class EnemyAttackControl {
         if (attackComponents.size() == 1) {
             attackComponents.clear();
             for (int i = 0; i < rand.nextInt(25 - 10 + 1) + 10; i++) {
-                attackComponents.add(new EnemyAttack(e.getXOrd() + e.getLength() / 2, e.getYOrd() - 70, 0, 0, -40));
+                attackComponents.add(new EnemyAttack(e.getXOrd() + e.getLength() / 2, e.getYOrd() - 70, 0, 0, -60));
             }
 
         // balls fall
@@ -503,10 +510,10 @@ public class EnemyAttackControl {
                 if (i == attackComponents.size() - 1) ea.setX(AssaultModel.GAME_LENGTH - ea.getWidth());
                 continue;
             }
-            if (prevEa != null && prevEa.getY() > 200) continue;    // wait before shooting next ball
+            if (prevEa != null && prevEa.getY() > 250) continue;    // wait before shooting next ball
 
             // increase ball size and shoot upwards
-            if (ea.getWidth() <= 32) ea.chargeBall(4);
+            if (ea.getWidth() <= 32) ea.chargeBall(8);
             else ea.setY(ea.getY() + ea.getVelY());
             flag = false;
         }
@@ -524,6 +531,7 @@ public class EnemyAttackControl {
         }
         if (allReachedPlatform) endAttack();
     }
+
 
 
 
