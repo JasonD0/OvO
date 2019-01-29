@@ -29,7 +29,7 @@ public class EnemyAttackControl {
      */
     private void initAttackTimer() {
         this.attackCD = new Timer(1000, ee -> {
-            attackCD.setDelay(rand.nextInt(3000 - 1500 + 1) + 1500);
+            attackCD.setDelay(rand.nextInt(3500 - 2000 + 1) + 2000);
             e.setAttacking(true);       // ensures enemy only attacks after timer delay
             attackCD.stop();
         });
@@ -73,7 +73,7 @@ public class EnemyAttackControl {
             case 8: laser(); break;
             case 9: bounce(); break;
             case 10: ballSmash(); break;
-            case 11: crash(); break;
+            case 11: meteor(); break;
             case 12: flush(); break;
             case 13: rain(); break;
         }
@@ -136,7 +136,7 @@ public class EnemyAttackControl {
             endAttack();
 
         // rush towards player
-        } else if (Math.abs(playerPos.getX() - e.getXOrd()) <= 300) {
+        } else if (Math.abs(playerPos.getX() - e.getXOrd()) <= 500) {
             e.setVelX(e.getDirX()*e.getVel()*2);
 
         // try get closer to player
@@ -152,6 +152,7 @@ public class EnemyAttackControl {
     private void jump() {
         // jump
         if (Math.abs(playerPos.getX() - e.getXOrd()) < 400) {
+            e.setVelX(0);
             e.setYOrd(getParabolicY());
             e.setAngle((e.getAngle() + 10) % 360);
             e.setVelX(e.getVel() * e.getDirX());
@@ -401,8 +402,8 @@ public class EnemyAttackControl {
     /**
      * teleport above player and crash down creating a pulse
      */
-    private void crash() {
-        // teleport to player
+    private void meteor() {
+        // teleport above player
         if (!flag) {
             e.setXOrd((int) playerPos.getX());
             e.setYOrd(100);
@@ -422,7 +423,6 @@ public class EnemyAttackControl {
             e.setVelY(25);
         }
     }
-
 
     /**
      * Multiple poles falls towards player
@@ -466,56 +466,66 @@ public class EnemyAttackControl {
 
     }
 
-
-
+    /**
+     * Shoot multiple balls into the sky then the balls fall at random positions
+     */
     private void rain() {
         e.setDirX(0);
         // create multiple balls
         if (attackComponents.size() == 1) {
             attackComponents.clear();
-            for (int i = 0; i < rand.nextInt(20 - 10 + 1) + 10; i++) {
-                attackComponents.add(new EnemyAttack(e.getXOrd() + e.getLength() / 2, e.getYOrd() - 50, 0, 0, -20));
+            for (int i = 0; i < rand.nextInt(25 - 10 + 1) + 10; i++) {
+                attackComponents.add(new EnemyAttack(e.getXOrd() + e.getLength() / 2, e.getYOrd() - 70, 0, 0, -40));
             }
 
         // balls fall
         } else if (flag) {
-            boolean allReachedPlatform = true;
-            for (int i = 0; i < attackComponents.size(); i++) {
-                EnemyAttack ea = attackComponents.get(i);
-                EnemyAttack prevEa = (i == 0) ? null : attackComponents.get(i-1);
-                if (ea.getY() - ea.getWidth() >= AssaultModel.PLATFORM_Y) continue;
-                if (prevEa != null && prevEa.getY() < 100) continue;
-                ea.setY(ea.getY() + rand.nextInt(30 - 15 + 1) + 15);
-                allReachedPlatform = false;
-            }
-            if (allReachedPlatform) endAttack();
+            precipitation();
 
         // shoot balls upwards
         } else {
-            e.setCasting(true);
-            flag = true;
-            for (int i = 0; i < attackComponents.size(); i++) {
-                EnemyAttack ea = attackComponents.get(i);
-                EnemyAttack prevEa = (i == 0) ? null : attackComponents.get(i-1);
-                if (ea.getY() + ea.getWidth() < 0) {
-                    // TODO : make balls fall in specific range depending on current player position
-                    // +- width*2  to ensure balls wont fall outside frame
-                    int maxX = (int)playerPos.getX() - ea.getWidth()*2;
-                    int minX = (int)playerPos.getX() + ea.getWidth()*2;
-                    ea.setX(rand.nextInt((AssaultModel.GAME_LENGTH - ea.getWidth()*2) - (ea.getWidth()*2) + 1) + ea.getWidth()*2);
-                    ea.setY(rand.nextInt(-ea.getWidth()*2 + 400 + 1) - 400);
-                    continue;
-                }
-                if (prevEa != null && prevEa.getY() > 250) continue;
-
-                if (ea.getWidth() <= 20) ea.chargeBall(2);
-                else ea.setY(ea.getY() + ea.getVelY());
-                flag = false;
-                if (!flag) playerPos = null;
-            }
+            evaporation();
         }
-
     }
+
+    private void evaporation() {
+        e.setCasting(true);
+        flag = true;    // true when all balls above the game window
+        for (int i = 0; i < attackComponents.size(); i++) {
+            EnemyAttack ea = attackComponents.get(i);
+            EnemyAttack prevEa = (i == 0) ? null : attackComponents.get(i-1);
+            // randomly place balls at random co-ordinates to fall down
+            if (ea.getY() + ea.getWidth() < 0) {
+                ea.setX(rand.nextInt((AssaultModel.GAME_LENGTH - ea.getWidth()) - (ea.getWidth()) + 1) + ea.getWidth());
+                ea.setY(rand.nextInt(-ea.getWidth()*2 + 400 + 1) - 400);
+                // ensure at least 1 ball falls at each end of the game window
+                if (i == 0)  ea.setX(ea.getWidth());
+                if (i == attackComponents.size() - 1) ea.setX(AssaultModel.GAME_LENGTH - ea.getWidth());
+                continue;
+            }
+            if (prevEa != null && prevEa.getY() > 200) continue;    // wait before shooting next ball
+
+            // increase ball size and shoot upwards
+            if (ea.getWidth() <= 32) ea.chargeBall(4);
+            else ea.setY(ea.getY() + ea.getVelY());
+            flag = false;
+        }
+    }
+
+    private void precipitation() {
+        boolean allReachedPlatform = true;  // false when at least one ball is falling
+        for (int i = 0; i < attackComponents.size(); i++) {
+            EnemyAttack ea = attackComponents.get(i);
+            EnemyAttack prevEa = (i == 0) ? null : attackComponents.get(i-1);
+            if (ea.getY() - ea.getWidth() >= AssaultModel.PLATFORM_Y) continue; // stop falling when below platform
+            if (prevEa != null && prevEa.getY() < 100) continue; // wait before another ball falls
+            ea.setY(ea.getY() + rand.nextInt(40 - 15 + 1) + 15);
+            allReachedPlatform = false;
+        }
+        if (allReachedPlatform) endAttack();
+    }
+
+
 
 
     // y= mx + b;
