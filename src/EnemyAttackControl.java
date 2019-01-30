@@ -5,14 +5,15 @@ import java.util.Random;
 import javax.swing.Timer;
 
 public class EnemyAttackControl {
-    private final static int NUM_ATTACKS = 13;
+    private final static int NUM_ATTACKS = 14;
     private Enemy e;
     private Random rand;
     private Point playerPos, startPos;  // saves starting co-ordinates of the attack for both
     private boolean flag;   // helper flags for attacks
     private List<EnemyAttack> attackComponents;
-    private Timer attackCD, attackDelay;
+    private Timer attackCD, attackDelay, idk;
     private int currentAttack;
+    private int currBall;
 
     public EnemyAttackControl(Enemy e) {
         this.e = e;
@@ -22,6 +23,7 @@ public class EnemyAttackControl {
         this.currentAttack = 0;
         initAttackTimer();
         initAttackDelay();
+        idk();
     }
 
     /**
@@ -60,7 +62,7 @@ public class EnemyAttackControl {
         if (startPos == null) startPos = new Point(e.getXOrd(), e.getYOrd());
 
         currentAttack = (attack == 0) ? rand.nextInt(NUM_ATTACKS) + 1 : attack;
-        //currentAttack = 8;
+        //currentAttack = 14;  // choose specific attack to repeat
 
         switch (currentAttack) {
             case 1: rollAttack(); break;
@@ -76,6 +78,7 @@ public class EnemyAttackControl {
             case 11: meteor(); break;
             case 12: flush(); break;
             case 13: rain(); break;
+            case 14: rotatingBalls(); break;
         }
 
         return currentAttack;
@@ -100,7 +103,7 @@ public class EnemyAttackControl {
         playerPos = null;
         startPos = null;
         flag = false;
-
+        idk.stop();
         attackComponents.clear();
         e.setAttacking(false);
         e.setCasting(false);
@@ -533,8 +536,89 @@ public class EnemyAttackControl {
     }
 
 
+    private void idk() {
+        this.idk = new Timer(50, e -> {
+            if (currBall == 0) attackComponents.get(11).setBallOpacity(0f);
+            if (currBall == 19) attackComponents.get(10).setBallOpacity(0f);
 
+            if ((currBall != 0 && currBall != 19) || attackComponents.get(currBall).getBallOpacity() > 0f) {
+                currBall = (flag) ? currBall - 1 : currBall + 1;
 
+                if (!flag) {
+                    attackComponents.get(currBall - 1).setBallOpacity(0f);
+                    attackComponents.get(currBall).setBallOpacity(1f);
+                } else {
+                    attackComponents.get(currBall + 1).setBallOpacity(0f);
+                    attackComponents.get(currBall).setBallOpacity(1f);
+                }
+            } else {
+                attackComponents.get(currBall).setBallOpacity(1f);
+            }
+
+            if (currBall + 1 == 11) {
+                currBall = 19;
+                flag = true;
+            }
+
+            if (currBall - 1 == 10) {
+                currBall = 0;
+                flag = false;
+            }
+        });
+    }
+
+    private void rotatingBalls() {
+        e.setYOrd(400);
+        EnemyAttack ea;
+        if (attackComponents.size() == 1) {
+            currBall = 0;
+            for (int i = 0; i < 19; i++) {
+                ea = new EnemyAttack();
+                ea.setBallOpacity(0f);
+                attackComponents.add(ea);
+            }
+
+        } else {
+            if (!idk.isRunning()) this.idk.restart();
+            int balls = attackComponents.size();
+            int centerX = e.getXOrd() + e.getLength()/2;
+            int radius = 160;
+            // lower circle including 2 ending vertex
+            for (int i = 0, j = 0; j < 11; j++) {
+                ea = attackComponents.get(j);
+                if (j == 1) ea.initBall(centerX - radius + 10, 0, 20, 5, 0);
+                else if (j == 9) ea.initBall(centerX - radius + 310, 0, 20, 5, 0);
+                else {
+                    ea.initBall(centerX - radius + 40 * i, 0, 20, 5, 0);
+                    i++;
+                }
+                ea.setY(getCircularY(ea, false));
+            }
+
+            // upper circle excluding 2 ending vertex
+            for (int i = 11, j = 11; j < 20; j++) {
+                ea = attackComponents.get(j);
+                if (j == 11) ea.initBall(centerX - radius + 10, 0, 20, 5, 0);
+                else if (j == 19) ea.initBall(centerX - radius + 310, 0, 20, 5, 0);
+                else {
+                    ea.initBall(centerX - radius + 40*(i - 11) + 40, 0, 20, 5, 0);
+                    i++;
+                }
+                ea.setY(getCircularY(ea, true));
+            }
+
+            e.setVelX(7*e.getDirX());
+        }
+    }
+
+    private int getCircularY(EnemyAttack ea, boolean upperSemi) {
+        double r = 160; // 160
+        double centerX = e.getXOrd() + e.getLength()/2;
+        double centerY = e.getYOrd() + e.getHeight()/2;
+        double squaredX = Math.pow((ea.getX() - centerX), 2);
+        double dy = Math.sqrt(Math.pow(r, 2) - squaredX)*((upperSemi) ? -1 : 1) + centerY;
+        return (int) dy;
+    }
 
     // y= mx + b;
     private int getLinearY(EnemyAttack ea) {
@@ -549,7 +633,7 @@ public class EnemyAttackControl {
 
     public boolean attackCollision(Player p) {
         for (EnemyAttack ea : attackComponents) {
-            if (p.getBoundary().intersects(ea.getBallBounds()) ||
+            if ((p.getBoundary().intersects(ea.getBallBounds()) && ea.getBallOpacity() > 0) ||
                     (p.getBoundary().intersects(ea.getLaserBounds()) && ea.getOpacity() > 0)) {
                 return true;
             }
