@@ -76,12 +76,19 @@ public class PlayerControl {
         p.setYOrd(p.getYOrd() + p.getVelY());
     }
 
+    /**
+     * Reduce player health
+     */
     public void takeDamage() {
         p.setDamaged(true);
         this.damageCD.restart();
         p.setHealth(p.getHealth() - 10);
     }
 
+    /**
+     * Move player upwards
+     * Player becomes unable to move until reaching a wall or the platform
+     */
     public void knockUp() {
         if (!p.isKnockedUp()) p.setVelY(-p.getMoveVel() * 4);
         else if (p.getYOrd() <= 200) p.setVelY(p.getMoveVel() * 2);
@@ -89,19 +96,31 @@ public class PlayerControl {
         p.setKnockedUp(true);
     }
 
+    /**
+     * Move player backwards when hit by certain enemy attacks
+     * Player becomes unable to move until reaching a wall or the platform
+     * @param pos    enemy position
+     */
     public void knockBack(Point pos) {
         p.setVelY(0);
         p.setKnockedBack(true);
         enemyPos = (pos == null) ? enemyPos : pos;
         startPos = (pos == null) ? startPos : new Point(p.getXOrd(), p.getYOrd());
-        if (p.getYOrd() + p.getHealth() < AssaultModel.PLATFORM_Y)
+        // move player along a diagonal line
+        if (p.getYOrd() + p.getHeight() < AssaultModel.PLATFORM_Y)
             p.setYOrd(getLinearY(p.getXOrd(), (int) enemyPos.getX(), (int) enemyPos.getY()));
+        // move player along a horizontal line
         if (p.getXOrd() >= enemyPos.getX()) p.setVelX(p.getMoveVel()*2);
         else p.setVelX(-p.getMoveVel()*2);
     }
 
-    // y = mx + b
-    // x2 y2  fixed position (use to b)     x1 y2  variable
+    /**
+     * Calculates new y-ordinate so that the player moves along a linear equation y = mx + b
+     * @param x1    current x-ordinate
+     * @param x2    initial x-ordinate
+     * @param y2    initial y-ordinate
+     * @return      new y-ordinate
+     */
     private int getLinearY(int x1, int x2, int y2) {
         double deltaX = (startPos.getX() - x2 == 0) ? 1 : startPos.getX() - x2;
         double deltaY = startPos.getY() - y2;
@@ -111,6 +130,9 @@ public class PlayerControl {
         return (int) dy;
     }
 
+    /**
+     * Prevent player from jumping beyond the game window
+     */
     private void stopAtCeiling() {
         if (p.getYOrd() >= 0) return;
         p.setYOrd(1);
@@ -121,6 +143,7 @@ public class PlayerControl {
 
     /**
      * Prevent player from jumping higher than the maximum jump
+     * Player begins falling
      */
     private void stopAtMaxJump() {
         if (AssaultModel.PLATFORM_Y - p.getYOrd() < p.getMaxJump() || p.isDashing() || p.isKnockedUp()) return;
@@ -130,6 +153,7 @@ public class PlayerControl {
 
     /**
      * Prevent player from falling below the platform
+     * Player stops on platform
      */
     private void stopOnPlatform() {
         if (p.getYOrd() <= AssaultModel.PLATFORM_Y - p.getHeight()) return;
@@ -142,6 +166,7 @@ public class PlayerControl {
 
     /**
      * Prevent player from moving past the left wall
+     * Player stops at left wall
      */
     private void stopAtLeftWall() {
         if (p.getXOrd() > 0) return;
@@ -154,20 +179,24 @@ public class PlayerControl {
 
     /**
      * Prevent player from moving past the right wall
+     * Player stops at right wall
      */
     private void stopAtRightWall() {
         if (p.getXOrd() + p.getLength() < AssaultModel.GAME_LENGTH) return;
         p.setXOrd(AssaultModel.GAME_LENGTH - p.getLength() - 1);
         p.setVelX(0);
-        if (p.getYOrd() + p.getHeight() < AssaultModel.PLATFORM_Y) p.setVelY(p.getMoveVel());
         p.setDashing(false);
         p.setKnockedBack(false);
+        // fall if player is not on the platform
+        if (p.getYOrd() + p.getHeight() < AssaultModel.PLATFORM_Y) p.setVelY(p.getMoveVel());
     }
 
     /**
-     * Stop player dash
+     * Stop player dash when dash distance reached
      */
     private void dashEnd() {
+        int direction = (p.getDirection().compareTo("E") == 0) ? 1 : -1;
+        p.setVelX(20*direction);
         if (Math.abs(p.getXOrd() - dashStart) < p.getMaxDash()) return;
         p.setVelX(0);
         p.setDashing(false);
@@ -185,8 +214,10 @@ public class PlayerControl {
         if (p.getXOrd() + p.getLength() >= AssaultModel.GAME_LENGTH - 1) return;
         if (!isKeyPressed(KeyEvent.VK_RIGHT) || isKeyPressed(KeyEvent.VK_C)) return;
         p.setVelX(p.getMoveVel());
-        p.setDirection("E");
-        attack.changeAttackAngle("E");
+        if (!isKeyPressed(KeyEvent.VK_UP)) {
+            p.setDirection("E");
+            attack.changeAttackAngle("E");
+        }
     }
 
     /**
@@ -196,19 +227,25 @@ public class PlayerControl {
         if (p.getXOrd() <= 1) return;
         if (!isKeyPressed(KeyEvent.VK_LEFT) || isKeyPressed(KeyEvent.VK_C)) return;
         p.setVelX(-p.getMoveVel());
-        p.setDirection("W");
-        attack.changeAttackAngle("W");
+        if (!isKeyPressed(KeyEvent.VK_UP)) {
+            p.setDirection("W");
+            attack.changeAttackAngle("W");
+        }
     }
 
     /**
      * Checks if a key is still held down
-     * @param key
-     * @return
+     * @param key    keyboard key pressed
+     * @return       true if key is currently pressed
      */
     private boolean isKeyPressed(int key) {
         return pressedKeys.getOrDefault(key, false);
     }
 
+    /**
+     * Change player movement based on key pressed
+     * @param key    keyboard key pressed
+     */
     public void keyPressed(int key) {
         // prevent changes in movement during a player dash
         if (p.isDashing() || p.isKnockedUp() || p.isKnockedBack()) return;
@@ -264,6 +301,10 @@ public class PlayerControl {
         dashCD.restart();
     }
 
+    /**
+     * Change player movement based on key released
+     * @param key    keyboard key released
+     */
     public void keyReleased(int key) {
         if (!p.isDashing() && !p.isKnockedUp() && !p.isKnockedBack()) {  // prevent changes in movement during a player dash
             if (key == KeyEvent.VK_RIGHT) p.setVelX(0); // stop the player from moving right

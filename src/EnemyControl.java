@@ -16,6 +16,9 @@ public class EnemyControl extends JPanel {
         this.av = av;
     }
 
+    /**
+     * Move player
+     */
     public void move() {
         if (e.isDead()) die();
         else {
@@ -30,7 +33,7 @@ public class EnemyControl extends JPanel {
     }
 
     /**
-     * Descends enemy to hell 😈
+     * Descends enemy to hell when enemy health reaches 0 😈
      */
     private void die() {
         e.setVelX(0);
@@ -38,11 +41,18 @@ public class EnemyControl extends JPanel {
         e.setYOrd(e.getYOrd() + e.getVelY());
     }
 
+    /**
+     * Reduce enemy health
+     */
     public void takeDamage() {
         e.setDamaged(true);
         e.setHealth(e.getHealth() - 5);
     }
 
+    /**
+     * Prevent enemy from moving below platform
+     * Enemy stops on platform
+     */
     private void stopOnPlatform() {
         if (e.getYOrd() + e.getHeight() <= am.PLATFORM_Y) return;
         if (currentAttack == 5) e.setWaiting(true);
@@ -52,6 +62,10 @@ public class EnemyControl extends JPanel {
         e.setVelY(0);
     }
 
+    /**
+     * Prevents enemy from moving past right wall
+     * Enemy stops at right wall
+     */
     private void stopAtRightWall() {
         if (e.getLength() != e.getStartLength()) return;
         if (e.getXOrd() + e.getLength() < am.GAME_LENGTH) return;
@@ -59,9 +73,14 @@ public class EnemyControl extends JPanel {
         eac.endAttack();
         e.setXOrd(am.GAME_LENGTH - e.getLength() - 1);
         e.setVelX(0);
+        // enemy moves down if not on platform
         if (e.getYOrd() + e.getHeight() < am.PLATFORM_Y) e.setVelY(e.getVel()*3);
     }
 
+    /**
+     * Prevents enemy from moving past left wall
+     * Enemy stops at left wall
+     */
     private void stopAtLeftWall() {
         if (e.getLength() != e.getStartLength()) return;
         if (e.getXOrd() > 0) return;
@@ -69,15 +88,22 @@ public class EnemyControl extends JPanel {
         eac.endAttack();
         e.setXOrd(1);
         e.setVelX(0);
+        // enemy moves down if not on platform
         if (e.getYOrd() + e.getHeight() < am.PLATFORM_Y) e.setVelY(e.getVel()*3);
 
     }
 
+    /**
+     * Perform an attack
+     */
     private void performAttack() {
         currentAttack = eac.chooseAttack(am.getPlayerPos(), currentAttack);
-
     }
 
+    /**
+     * Draws enemy attack components
+     * @param g    graphic used for drawing
+     */
     @Override
     public void paintComponent(Graphics g) {
         if (currentAttack == 0) return;

@@ -45,17 +45,22 @@ public class EnemyAttackControl {
         this.attackDelay = new Timer(500, e -> attackDelay.stop());
     }
 
+    /**
+     * Get all objects associated with an attack
+     * @return    list of EnemyAttack objects
+     */
     public List<EnemyAttack> getAttackComponents() {
         return this.attackComponents;
     }
 
     /**
-     *
-     * @param pos       co-ordinate in which the attack is directed towards
-     * @param attack
-     * @return
+     * Randomly choose and perform an attack
+     * @param pos       player co-ordinate
+     * @param attack    current attack
+     * @return          attack chosen
      */
     public int chooseAttack(Point pos, int attack) {
+        // setup for newly chosen attacks
         if (attackComponents.size() == 0) attackComponents.add(new EnemyAttack());
         e.setAttacking(true);
         if (playerPos == null) setDirection(pos);
@@ -76,7 +81,7 @@ public class EnemyAttackControl {
             case 9: bounce(); break;
             case 10: ballSmash(); break;
             case 11: meteor(); break;
-            case 12: flush(); break;
+            case 12: staircase(); break;
             case 13: rain(); break;
             case 14: rotatingBalls(); break;
         }
@@ -84,13 +89,17 @@ public class EnemyAttackControl {
         return currentAttack;
     }
 
+    /**
+     * Gets current attack
+     * @return    current attack
+     */
     public int getCurrentAttack() {
         return this.currentAttack;
     }
 
     /**
-     * Sets direction in which the attack is directed towards
-     * @param pos
+     * Sets direction in which the attack is directed towards and saves player co-ordinate
+     * @param pos    player co-ordinate
      */
     private void setDirection(Point pos) {
         this.playerPos = pos;
@@ -99,6 +108,9 @@ public class EnemyAttackControl {
         for (EnemyAttack ea : attackComponents) ea.setDirX(e.getDirX());
     }
 
+    /**
+     * End enemy attack
+     */
     public void endAttack() {
         playerPos = null;
         startPos = null;
@@ -113,6 +125,9 @@ public class EnemyAttackControl {
         attackCD.start();
     }
 
+    /**
+     * Move towards the player
+     */
     private void moveTowardsPlayer() {
         this.playerPos = null;
         //e.setVelX(directionX*e.getVel());
@@ -123,7 +138,7 @@ public class EnemyAttackControl {
      * Enemy rolls towards player until reaching a wall
      */
     private void rollAttack() {
-        e.setVelX(e.getDirX()*e.getVel()*2);
+        e.setVelX((int) (e.getDirX()*e.getVel()*1.5));
         e.setVelY(0);
         e.setAngle((e.getAngle() + 20) % 360);
     }
@@ -138,7 +153,7 @@ public class EnemyAttackControl {
              e.getDirX() == -1 && e.getXOrd() <= playerPos.getX()) {
             endAttack();
 
-        // rush towards player
+        // rush towards player when in distance of 500 pixels
         } else if (Math.abs(playerPos.getX() - e.getXOrd()) <= 500) {
             e.setVelX(e.getDirX()*e.getVel()*2);
 
@@ -153,7 +168,7 @@ public class EnemyAttackControl {
      * then jump on top of player
      */
     private void jump() {
-        // jump
+        // jump when player in distance of 400 pixels
         if (Math.abs(playerPos.getX() - e.getXOrd()) < 400) {
             e.setVelX(0);
             e.setYOrd(getParabolicY());
@@ -166,7 +181,10 @@ public class EnemyAttackControl {
         }
     }
 
-    // y = a(x - h)^2 + k
+    /**
+     * Calculates y-ordinate so that the enemy moves along the parabolic equation y = a(x - h)^2 + k
+     * @return    new y-ordinate
+     */
     private int getParabolicY() {
         double startX = startPos.getX() + e.getLength()/2;
         double endX = playerPos.getX();
@@ -202,6 +220,9 @@ public class EnemyAttackControl {
         }
     }
 
+    /**
+     * Reduce length of enemy
+     */
     private void snailReduceLength() {
         e.setVelX(0);
         flag = true;    // ensures this if is executed when starting to reduce length
@@ -219,6 +240,9 @@ public class EnemyAttackControl {
         }
     }
 
+    /**
+     * Increase enemy length
+     */
     private void snailIncreaseLength() {
         e.setVelX(0);
         // reduce length when reach left/right wall
@@ -233,8 +257,7 @@ public class EnemyAttackControl {
     }
 
     /**
-     * Jumps up then crash down
-         * Create 'shockwave'
+     * Jumps up then crash down creating a 'shock-wave' (expanding circle that pushes player backwards)
      */
     private void jumpShock() {
         // go down
@@ -255,7 +278,7 @@ public class EnemyAttackControl {
 
     /**
      * Increase size of ball then releases it towards player
-     * ball comes back at a certain length
+     * ball comes back after moving a certain distance
      */
     private void energyBall() {
         EnemyAttack ea = attackComponents.get(0);
@@ -263,10 +286,13 @@ public class EnemyAttackControl {
         // ball 'boomerangs' back
         if (ea.isCharging() && (Math.abs(ea.getX() - e.getXOrd()) >= 600 || ea.getX() <= 0 || ea.getX() + ea.getWidth() >= 1484 || flag)) {
             flag = true;    // ensures ball continues to return back to current position
+            // end attack when ball reached enemy
             if (e.getDirX() == -1 && ea.getX() + ea.getWidth() >= e.getXOrd()) endAttack();
             if (e.getDirX() == 1 && ea.getX() <= e.getXOrd() + e.getLength()) endAttack();
+
             ea.setX(ea.getX() + ea.getVelX()*e.getDirX()*-1);
 
+        // perform attack when player in distance of 300 pixels
         } else if (Math.abs(playerPos.getX() - e.getXOrd()) < 300) {
             e.setVelX(0);
             // create ball
@@ -287,16 +313,20 @@ public class EnemyAttackControl {
 
     /**
      * Circle expands from enemy that knocks back and damages player
+     * @param pulseWidth    radius of the circle
      */
     private void pulse(int pulseWidth) {
         EnemyAttack ea = attackComponents.get(0);
-        // flag true when crash attack
+        // flag true when crash attack is being performed
+        // perform attack when player in distance of 400 pixels
         if (Math.abs(playerPos.getX() - e.getXOrd()) < 400 || flag) {
             e.setVelX(0);
+            // create ball
             if (!ea.isCharging()) {
                 ea.setCharging(true);
                 ea.initBall(e.getXOrd() + e.getLength()/2, e.getYOrd() + e.getHeight()/2, 2, 0, 0);
 
+            // expand ball
             } else {
                 if (ea.getWidth() >= pulseWidth) endAttack();
                 else if (ea.getWidth() < 150) ea.chargeBall(10);
@@ -357,6 +387,7 @@ public class EnemyAttackControl {
     private void ballSmash() {
         EnemyAttack ea = attackComponents.get(0);
 
+        // perform attack when player in distance of 200 pixels
         if (Math.abs(playerPos.getX() - e.getXOrd()) < 200) {
             e.setVelX(0);
             // create ball
@@ -370,7 +401,7 @@ public class EnemyAttackControl {
                 ea.setVelX(0);
                 ea.chargeBall(2);
 
-            } else if (ea.getY() + ea.getWidth() >= AssaultModel.PLATFORM_Y) {
+            } else if (ea.getY() + ea.getHeight() >= AssaultModel.PLATFORM_Y) {
                 // swing ball back when first reach platform
                 if (!flag) {
                     e.setDirX((e.getDirX() == 1) ? -1 : 1);
@@ -391,7 +422,11 @@ public class EnemyAttackControl {
         }
     }
 
-    // y = a(x - h)^2 + k
+    /**
+     * Move attack component along the parabolic equation y = a(x - h)^2 + k
+     * @param ea    attack component
+     * @return      new y-ordinate
+     */
     private int getBallParabolicY(EnemyAttack ea) {
         double endX = startPos.getX() - 175;
         double h = startPos.getX();
@@ -415,7 +450,7 @@ public class EnemyAttackControl {
             flag = true;
             startDelay(50);
 
-        // pulse when reaching platform
+        // expand circle when reaching platform
         } else if (e.getYOrd() + e.getHeight() >= AssaultModel.PLATFORM_Y) {
             e.setVelY(0);
             e.setYOrd(AssaultModel.PLATFORM_Y - e.getHeight());
@@ -428,24 +463,27 @@ public class EnemyAttackControl {
     }
 
     /**
-     * Multiple poles falls towards player
+     * Multiple pillars falls towards player
      */
-    private void flush() {
+    private void staircase() {
         if (Math.abs(playerPos.getX() - e.getXOrd()) >= 600) {
             moveTowardsPlayer();
         }
 
         // create poles
         else if (attackComponents.size() == 1) {
-            initPoles();
+            initSteps();
 
         // move poles
         } else if (!attackDelay.isRunning()) {
-            movePoles();
+            placeSteps();
         }
     }
 
-    private void initPoles() {
+    /**
+     * Create pillars for staircase attack and place them above the game window
+     */
+    private void initSteps() {
         e.setCasting(true);
         e.setVelX(0);
         attackComponents.clear();
@@ -457,13 +495,16 @@ public class EnemyAttackControl {
         startDelay(500); // wait 0.5 secs after circle is drawn to indicate this attack is coming
     }
 
-    private void movePoles() {
-        boolean moving = false;   // true if at least one pole moved
+    /**
+     * Move pillars from staircase attack down from above the game window
+     */
+    private void placeSteps() {
+        boolean moving = false;   // true if at least one pillar moved
         for (int i = 0; i < attackComponents.size(); i++) {
             EnemyAttack ea = attackComponents.get(i);
             EnemyAttack prevEa = (i != 0) ? attackComponents.get(i-1) : null;
             if (ea.getY() + ea.getHeight() >= AssaultModel.PLATFORM_Y) continue; // stop when reach platform
-            // wait until previous pole reached the platform before moving
+            // wait until previous pillar reached the platform before moving
             if (prevEa != null && prevEa.getY() + prevEa.getHeight() < AssaultModel.PLATFORM_Y) continue;
             ea.setY(ea.getY() + ea.getVelY());
             moving = true;
@@ -498,6 +539,9 @@ public class EnemyAttackControl {
         }
     }
 
+    /**
+     * Shoot balls from rain attack above the game window
+     */
     private void evaporation() {
         e.setCasting(true);
         flag = true;    // true when all balls above the game window
@@ -522,6 +566,9 @@ public class EnemyAttackControl {
         }
     }
 
+    /**
+     * Move balls from rain attack down from above the game window
+     */
     private void precipitation() {
         boolean allReachedPlatform = true;  // false when at least one ball is falling
         for (int i = 0; i < attackComponents.size(); i++) {
@@ -575,6 +622,11 @@ public class EnemyAttackControl {
         });
     }
 
+    /**
+     * Flips adjacent ball opacity for rotating ball timer
+     * @param ball        indicates which ball to move (currBall1 or currBall2)
+     * @param currBall    index of the currently moving ball
+     */
     private void flipBallOpacity(String ball, int currBall) {
         if (currBall == 0) attackComponents.get(11).setBallOpacity(0f);
         if (currBall == 19) attackComponents.get(10).setBallOpacity(0f);
@@ -596,6 +648,11 @@ public class EnemyAttackControl {
         attackComponents.get(currBall).setBallOpacity(1f);
     }
 
+    /**
+     * Place balls above the enemy, forming an upper semi-circle
+     * @param centerX    center x-ordinate to place the ball around
+     * @param radius     radius of the circle in which the balls are placed upon
+     */
     private void initUpperCircle(int centerX, int radius) {
         // lower circle including 2 ending vertex
         // attack index 0 to 10  from left to right
@@ -611,6 +668,11 @@ public class EnemyAttackControl {
         }
     }
 
+    /**
+     * Place balls below the enemy, forming the lower semi-circle
+     * @param centerX    center x-ordinate to place the ball around
+     * @param radius     radius of the circle in which the balls are placed upon
+     */
     private void initLowerCircle(int centerX, int radius) {
         // upper circle excluding 2 ending vertex
         // attack index 11 to 19  from left to right
@@ -626,6 +688,13 @@ public class EnemyAttackControl {
         }
     }
 
+    /**
+     * Calculate y along a circle with enemy as the center
+     * (y - h)^2 + (x - k)^2 = r^2
+     * @param ea           attack component to move
+     * @param upperSemi    true if calculating y for the upper semi-circle
+     * @return             new y-ordinate
+     */
     private int getCircularY(EnemyAttack ea, boolean upperSemi) {
         double r = 160;
         double centerX = e.getXOrd() + e.getLength()/2;
@@ -650,6 +719,11 @@ public class EnemyAttackControl {
     }
 
 
+    /**
+     * Check collisions between any attack components and the player
+     * @param p    player object
+     * @return     true if player collided with any attack components
+     */
     public boolean attackCollision(Player p) {
         for (EnemyAttack ea : attackComponents) {
             if ((p.getBoundary().intersects(ea.getBallBounds()) && ea.getBallOpacity() > 0) ||
@@ -661,16 +735,20 @@ public class EnemyAttackControl {
         return false;
     }
 
+    /**
+     * Set and start delay during an attack
+     * @param delay    delay during attacks in milliseconds
+     */
+    private void startDelay(int delay) {
+        this.attackDelay.setDelay(delay);
+        this.attackDelay.start();
+    }
+
     public void stopAttackTimer() {
         this.attackCD.stop();
     }
 
     public void startAttackTimer() {
         this.attackCD.start();
-    }
-
-    private void startDelay(int delay) {
-        this.attackDelay.setDelay(delay);
-        this.attackDelay.start();
     }
 }

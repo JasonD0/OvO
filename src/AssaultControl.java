@@ -68,6 +68,9 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
         initGameTimer();
     }
 
+    /**
+     * Timer for how long game has been running
+     */
     private void initGameTimer() {
         gameTimer = new Timer(1000, e -> {
             am.updateCounter();
@@ -76,12 +79,18 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
         gameTimer.start();
     }
 
+    /**
+     * Add platform and instructions to the game
+     */
     private void addPlatform() {
         add(Box.createRigidArea(new Dimension(0, am.PLATFORM_Y)));
         av.drawPlatform(this);
         av.drawInstructions(this);
     }
 
+    /**
+     * Move player and enemy, and check collisions
+     */
     private void actionPerformed() {
         if (am.isPaused()) return;
         requestFocusInWindow();
