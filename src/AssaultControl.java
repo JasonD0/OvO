@@ -24,8 +24,10 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
     private PlayerControl pc;
     private EnemyControl ec;
     private List<Obstacle> obstacles;
+    private Assault game;
 
-    public AssaultControl() {
+    public AssaultControl(Assault game) {
+        this.game = game;
         this.p = new Player(100, am.PLATFORM_Y - 25, 25, 25, 0,0, 100, Color.BLACK);
         this.e = new Enemy(1300, am.PLATFORM_Y - 50, 50, 50, 0, 0, 100, Color.WHITE);
         this.playerAttack = new Attack();
@@ -166,6 +168,7 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
         if (e.isWaiting()) av.drawShockwave(g, obstacles, am.AQUA);
         av.drawEntity(g, p, playerAttack);
         ec.paintComponent(g);
+        if (p.getHealth() <= 0 || e.getHealth() <= 0) av.drawRestart(g);
     }
 
     @Override
@@ -186,6 +189,10 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
                 eac.startAttackTimer();
                 gameTimer.start();
             }
+
+        } else if ((p.getHealth() <= 0 || this.e.getHealth() <= 0) && e.getKeyCode() == KeyEvent.VK_F) {
+            running = false;
+            game.startGame();
 
         } else {
             pc.keyReleased(e.getKeyCode());

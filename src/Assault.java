@@ -3,6 +3,8 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 
@@ -10,26 +12,39 @@ public class Assault extends JFrame {
     private static int LENGTH = 1500;
     private static int HEIGHT = 700;
     private static String TITLE = "Attack Simulation";
+    private Box layout;
     private List<Image> icons;
 
     private Assault() {
         icons = new ArrayList<>();
+        layout = new Box(BoxLayout.Y_AXIS);
         init();
     }
 
     private void init() {
         setTitle(TITLE);
         addJFrameIcon();
+        setFocusable(true);
         setPreferredSize(new Dimension(LENGTH, HEIGHT));
         setMaximumSize(new Dimension(LENGTH, HEIGHT));
         setMinimumSize(new Dimension(LENGTH, HEIGHT));
-        setFocusable(true);
-        add(new AssaultControl());
+        layout.add(new AssaultControl(this));
+        setContentPane(layout);
         pack();
         setResizable(false);
         setVisible(true);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    }
+
+    public void startGame() {
+        layout.removeAll();
+        setPreferredSize(new Dimension(LENGTH, HEIGHT));
+        setMaximumSize(new Dimension(LENGTH, HEIGHT));
+        setMinimumSize(new Dimension(LENGTH, HEIGHT));
+        layout.add(new AssaultControl(this));
+        setLocationRelativeTo(null);
+        setContentPane(layout);
     }
 
     private void addJFrameIcon() {

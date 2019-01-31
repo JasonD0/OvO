@@ -24,6 +24,14 @@ public class AssaultView {
         parent.add(platform);
     }
 
+    public void drawRestart(Graphics g) {
+        Graphics2D g2d = (Graphics2D) g.create();
+        g2d.setColor(AssaultModel.AQUA);
+        g2d.setFont(new Font(null, Font.BOLD, 25));
+        g2d.drawString("Press F to Restart", AssaultModel.GAME_LENGTH/2 - 110, AssaultModel.GAME_HEIGHT/2);
+        g2d.dispose();
+    }
+
     public void drawInstructions(AssaultControl parent) {
         JLabel instructions = new JLabel("", SwingConstants.CENTER);
         instructions.setFont(new Font(null, Font.BOLD, 20));
