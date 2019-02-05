@@ -5,7 +5,7 @@ import java.util.Random;
 import javax.swing.Timer;
 
 public class EnemyAttackControl {
-    private final static int NUM_ATTACKS = 14;
+    private final static int NUM_ATTACKS = 15;
     private Enemy e;
     private Random rand;
     private Point playerPos, startPos;  // saves starting co-ordinates of the attack for both
@@ -67,23 +67,24 @@ public class EnemyAttackControl {
         if (startPos == null) startPos = new Point(e.getXOrd(), e.getYOrd());
 
         currentAttack = (attack == 0) ? rand.nextInt(NUM_ATTACKS) + 1 : attack;
-        //currentAttack = 14;  // choose specific attack to repeat
+        currentAttack = 4;  // choose specific attack to repeat
 
         switch (currentAttack) {
             case 1: rollAttack(); break;
             case 2: rush(); break;
             case 3: jump(); break;
-            case 4: snail(); break;
-            case 5: jumpShock(); break;
-            case 6: energyBall(); break;
-            case 7: pulse(450); break;
-            case 8: laser(); break;
-            case 9: bounce(); break;
-            case 10: ballSmash(); break;
-            case 11: meteor(); break;
-            case 12: staircase(); break;
-            case 13: rain(); break;
-            case 14: rotatingBalls(); break;
+            case 4: sting(); break;
+            case 5: snail(); break;
+            case 6: jumpShock(); break;
+            case 7: energyBall(); break;
+            case 8: pulse(450); break;
+            case 9: laser(); break;
+            case 10: bounce(); break;
+            case 11: ballSmash(); break;
+            case 12: meteor(); break;
+            case 13: staircase(); break;
+            case 14: rain(); break;
+            case 15: rotatingBalls(); break;
         }
 
         return currentAttack;
@@ -179,6 +180,46 @@ public class EnemyAttackControl {
         } else {
             moveTowardsPlayer();
         }
+    }
+
+    /**
+     * Jumps up and glides towards the player, create a shockwave
+     */
+    private void sting() {
+        // jump up
+        if (e.getYOrd() > 200 && !flag) {
+            e.setVelY(-e.getVel());
+            playerPos = null;
+            startPos = null;
+
+            // stop and prepare to glide towards player
+        } else if (e.getYOrd() < 200) {
+            e.setVelY(0);
+            e.setYOrd(200);
+            flag = true;
+
+            // glide towards player
+        } else {
+            e.setXOrd(e.getXOrd() + e.getVel()*e.getDirX()*3);
+            e.setYOrd(getLinearY(e.getXOrd(), playerPos, startPos));
+        }
+    }
+
+    /**
+     * y= mx + b
+     * @param x
+     * @param start1
+     * @param start2
+     * @return
+     */
+    private int getLinearY(int x, Point start1, Point start2) {
+        double deltaY = start1.getY() - 25 - start2.getY();
+        double deltaX = start1.getX() - start2.getX();
+        if (deltaX == 0) deltaX = 1;
+        double m = deltaY/deltaX;
+        double b = start1.getY() -25 - m*start1.getX();
+        double y = m*x + b;
+        return (int) y;
     }
 
     /**
@@ -422,7 +463,7 @@ public class EnemyAttackControl {
         }
     }
 
-    /**
+     /**
      * Move attack component along the parabolic equation y = a(x - h)^2 + k
      * @param ea    attack component
      * @return      new y-ordinate
@@ -703,21 +744,6 @@ public class EnemyAttackControl {
         double dy = Math.sqrt(Math.pow(r, 2) - squaredX)*((upperSemi) ? -1 : 1) + centerY;
         return (int) dy;
     }
-
-
-
-
-
-    // y= mx + b;
-    private int getLinearY(EnemyAttack ea) {
-        double m = (ea.getAngle() == 45) ? -1 : 1;
-        double index = attackComponents.lastIndexOf(ea);
-        double startX = e.getXOrd() + e.getLength()/2 + e.getDirX()*(e.getLength()/2 + index*160 - 800);
-        double startY = 0 - ea.getHeight();
-        double b = startY - m*startX;
-        return (int)(m*ea.getX() + b);
-    }
-
 
     /**
      * Check collisions between any attack components and the player

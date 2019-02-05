@@ -6,6 +6,7 @@ public class EnemyControl extends JPanel {
     private Enemy e;
     private EnemyAttackControl eac;
     private AssaultView av;
+    private int damage;
     private int currentAttack; // ensures current progresses until end
 
     public EnemyControl(AssaultModel am, Enemy e, EnemyAttackControl eac, AssaultView av) {
@@ -14,6 +15,7 @@ public class EnemyControl extends JPanel {
         this.eac = eac;
         this.currentAttack = 0;
         this.av = av;
+        this.damage = 5;
     }
 
     /**
@@ -46,7 +48,7 @@ public class EnemyControl extends JPanel {
      */
     public void takeDamage() {
         e.setDamaged(true);
-        e.setHealth(e.getHealth() - 5);
+        e.setHealth(e.getHealth() - damage);
     }
 
     /**
@@ -107,7 +109,12 @@ public class EnemyControl extends JPanel {
     @Override
     public void paintComponent(Graphics g) {
         if (currentAttack == 0) return;
-        if (e.isCasting()) av.drawMagicCircle(g, e);
+        if (e.isCasting()) {
+            av.drawMagicCircle(g, e);
+            this.damage = 1;
+        } else {
+            this.damage = 5;
+        }
         if (currentAttack == 12) av.drawRectangularAttack(g, eac.getAttackComponents());
         else av.drawBallAttack(g, eac.getAttackComponents(), (eac.getCurrentAttack() == 8) ? true : false);
         if (currentAttack == 8) av.drawLaser(g, eac.getAttackComponents());

@@ -82,7 +82,7 @@ public class PlayerControl {
     public void takeDamage() {
         p.setDamaged(true);
         this.damageCD.restart();
-        p.setHealth(p.getHealth() - 10);
+        p.setHealth(p.getHealth() - 15);
     }
 
     /**
@@ -110,8 +110,8 @@ public class PlayerControl {
         if (p.getYOrd() + p.getHeight() < AssaultModel.PLATFORM_Y)
             p.setYOrd(getLinearY(p.getXOrd(), (int) enemyPos.getX(), (int) enemyPos.getY()));
         // move player along a horizontal line
-        if (p.getXOrd() >= enemyPos.getX()) p.setVelX(p.getMoveVel()*2);
-        else p.setVelX(-p.getMoveVel()*2);
+        if (p.getXOrd() >= enemyPos.getX()) p.setVelX(p.getMoveVel()*3);
+        else p.setVelX(-p.getMoveVel()*3);
     }
 
     /**
