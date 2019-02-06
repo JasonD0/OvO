@@ -67,24 +67,24 @@ public class EnemyAttackControl {
         if (startPos == null) startPos = new Point(e.getXOrd(), e.getYOrd());
 
         currentAttack = (attack == 0) ? rand.nextInt(NUM_ATTACKS) + 1 : attack;
-        currentAttack = 4;  // choose specific attack to repeat
+//        currentAttack = 4;  // choose specific attack to repeat
 
         switch (currentAttack) {
             case 1: rollAttack(); break;
             case 2: rush(); break;
             case 3: jump(); break;
-            case 4: sting(); break;
-            case 5: snail(); break;
-            case 6: jumpShock(); break;
-            case 7: energyBall(); break;
-            case 8: pulse(450); break;
-            case 9: laser(); break;
-            case 10: bounce(); break;
-            case 11: ballSmash(); break;
-            case 12: meteor(); break;
-            case 13: staircase(); break;
-            case 14: rain(); break;
-            case 15: rotatingBalls(); break;
+            case 4: snail(); break;
+            case 5: jumpShock(); break;
+            case 6: energyBall(); break;
+            case 7: pulse(450); break;
+            case 8: laser(); break;
+            case 9: bounce(); break;
+            case 10: ballSmash(); break;
+            case 11: meteor(); break;
+            case 12: staircase(); break;
+            case 13: rain(); break;
+            case 14: rotatingBalls(); break;
+            case 15: sting(); break;
         }
 
         return currentAttack;
