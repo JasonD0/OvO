@@ -8,10 +8,10 @@ import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 
-public class Assault extends JFrame {
+public class Ovo extends JFrame {
     private static int LENGTH = 1500;
     private static int HEIGHT = 700;
-    private static String TITLE = "Attack Simulation";
+    private static String TITLE = "OvO";
     private Box layout;
     private List<Image> icons;
 
@@ -28,7 +28,7 @@ public class Assault extends JFrame {
         setPreferredSize(new Dimension(LENGTH, HEIGHT));
         setMaximumSize(new Dimension(LENGTH, HEIGHT));
         setMinimumSize(new Dimension(LENGTH, HEIGHT));
-        layout.add(new AssaultControl(this));
+        layout.add(new OvoControl(this));
         setContentPane(layout);
         pack();
         setResizable(false);
@@ -42,7 +42,7 @@ public class Assault extends JFrame {
         setPreferredSize(new Dimension(LENGTH, HEIGHT));
         setMaximumSize(new Dimension(LENGTH, HEIGHT));
         setMinimumSize(new Dimension(LENGTH, HEIGHT));
-        layout.add(new AssaultControl(this));
+        layout.add(new OvoControl(this));
         setLocationRelativeTo(null);
         setContentPane(layout);
     }
@@ -57,6 +57,6 @@ public class Assault extends JFrame {
     }
 
     public static void main(String[] args) {
-        new Assault();
+        new Ovo();
     }
 }
