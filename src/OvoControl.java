@@ -11,7 +11,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
-public class AssaultControl extends JPanel implements Runnable, KeyListener {
+public class OvoControl extends JPanel implements Runnable, KeyListener {
     private Thread t;
     private boolean running;
     private AssaultView av;
@@ -24,9 +24,9 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
     private PlayerControl pc;
     private EnemyControl ec;
     private List<Obstacle> obstacles;
-    private Assault game;
+    private Ovo game;
 
-    public AssaultControl(Assault game) {
+    public AssaultControl(Ovo game) {
         this.game = game;
         this.p = new Player(100, am.PLATFORM_Y - 25, 25, 25, 0,0, 100, Color.BLACK);
         this.e = new Enemy(1300, am.PLATFORM_Y - 50, 50, 50, 0, 0, 100, Color.WHITE);
