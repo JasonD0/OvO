@@ -287,9 +287,9 @@ public class EnemyAttackControl {
     private void snailIncreaseLength() {
         e.setVelX(0);
         // reduce length when reach left/right wall
-        if (e.getXOrd() <= 0 || e.getXOrd() + e.getLength() >= AssaultModel.GAME_LENGTH) {
+        if (e.getXOrd() <= 0 || e.getXOrd() + e.getLength() >= OvoModel.GAME_LENGTH) {
             if (e.getXOrd() <= 0) e.setXOrd(1);
-            else e.setXOrd(AssaultModel.GAME_LENGTH - e.getLength() - 1);
+            else e.setXOrd(OvoModel.GAME_LENGTH - e.getLength() - 1);
             flag = true;
             return;
         }
@@ -416,8 +416,8 @@ public class EnemyAttackControl {
         if (e.getYOrd() <= 0) e.setVelY(e.getVel()*3);
 
         // bounce up when hit platform
-        else if (e.getYOrd() + e.getHeight() >= AssaultModel.PLATFORM_Y) {
-            e.setYOrd(AssaultModel.PLATFORM_Y - e.getHeight() - 10);
+        else if (e.getYOrd() + e.getHeight() >= OvoModel.PLATFORM_Y) {
+            e.setYOrd(OvoModel.PLATFORM_Y - e.getHeight() - 10);
             e.setVelY(-e.getVel()*3);
         }
     }
@@ -442,7 +442,7 @@ public class EnemyAttackControl {
                 ea.setVelX(0);
                 ea.chargeBall(2);
 
-            } else if (ea.getY() + ea.getHeight() >= AssaultModel.PLATFORM_Y) {
+            } else if (ea.getY() + ea.getHeight() >= OvoModel.PLATFORM_Y) {
                 // swing ball back when first reach platform
                 if (!flag) {
                     e.setDirX((e.getDirX() == 1) ? -1 : 1);
@@ -473,7 +473,7 @@ public class EnemyAttackControl {
         double h = startPos.getX();
         double k = startPos.getY();
         double x = ea.getX();
-        double a = (AssaultModel.PLATFORM_Y - k)/Math.pow(endX - h, 2);
+        double a = (OvoModel.PLATFORM_Y - k)/Math.pow(endX - h, 2);
         double dy = a*Math.pow((x - h), 2) + k;
         return (int) dy;
     }
@@ -492,9 +492,9 @@ public class EnemyAttackControl {
             startDelay(50);
 
         // expand circle when reaching platform
-        } else if (e.getYOrd() + e.getHeight() >= AssaultModel.PLATFORM_Y) {
+        } else if (e.getYOrd() + e.getHeight() >= OvoModel.PLATFORM_Y) {
             e.setVelY(0);
-            e.setYOrd(AssaultModel.PLATFORM_Y - e.getHeight());
+            e.setYOrd(OvoModel.PLATFORM_Y - e.getHeight());
             pulse(250);
 
         // move downwards
@@ -544,9 +544,9 @@ public class EnemyAttackControl {
         for (int i = 0; i < attackComponents.size(); i++) {
             EnemyAttack ea = attackComponents.get(i);
             EnemyAttack prevEa = (i != 0) ? attackComponents.get(i-1) : null;
-            if (ea.getY() + ea.getHeight() >= AssaultModel.PLATFORM_Y) continue; // stop when reach platform
+            if (ea.getY() + ea.getHeight() >= OvoModel.PLATFORM_Y) continue; // stop when reach platform
             // wait until previous pillar reached the platform before moving
-            if (prevEa != null && prevEa.getY() + prevEa.getHeight() < AssaultModel.PLATFORM_Y) continue;
+            if (prevEa != null && prevEa.getY() + prevEa.getHeight() < OvoModel.PLATFORM_Y) continue;
             ea.setY(ea.getY() + ea.getVelY());
             moving = true;
         }
@@ -591,11 +591,11 @@ public class EnemyAttackControl {
             EnemyAttack prevEa = (i == 0) ? null : attackComponents.get(i-1);
             // randomly place balls at random co-ordinates to fall down
             if (ea.getY() + ea.getWidth() < 0) {
-                ea.setX(rand.nextInt((AssaultModel.GAME_LENGTH - ea.getWidth()) - (ea.getWidth()) + 1) + ea.getWidth());
+                ea.setX(rand.nextInt((OvoModel.GAME_LENGTH - ea.getWidth()) - (ea.getWidth()) + 1) + ea.getWidth());
                 ea.setY(rand.nextInt(-ea.getWidth()*2 + 400 + 1) - 400);
                 // ensure at least 1 ball falls at each end of the game window
                 if (i == 0)  ea.setX(ea.getWidth());
-                if (i == attackComponents.size() - 1) ea.setX(AssaultModel.GAME_LENGTH - ea.getWidth());
+                if (i == attackComponents.size() - 1) ea.setX(OvoModel.GAME_LENGTH - ea.getWidth());
                 continue;
             }
             if (prevEa != null && prevEa.getY() > 250) continue;    // wait before shooting next ball
@@ -615,7 +615,7 @@ public class EnemyAttackControl {
         for (int i = 0; i < attackComponents.size(); i++) {
             EnemyAttack ea = attackComponents.get(i);
             EnemyAttack prevEa = (i == 0) ? null : attackComponents.get(i-1);
-            if (ea.getY() - ea.getWidth() >= AssaultModel.PLATFORM_Y) continue; // stop falling when below platform
+            if (ea.getY() - ea.getWidth() >= OvoModel.PLATFORM_Y) continue; // stop falling when below platform
             if (prevEa != null && prevEa.getY() < 100) continue; // wait before another ball falls
             ea.setY(ea.getY() + rand.nextInt(40 - 15 + 1) + 15);
             allReachedPlatform = false;

@@ -1,7 +1,7 @@
 import java.awt.Color;
 import java.awt.Point;
 
-public class AssaultModel {
+public class OvoModel {
     public final static int GAME_LENGTH = 1484;
     public final static int GAME_HEIGHT = 660;
     public final static int PLATFORM_Y = 590;
@@ -13,7 +13,7 @@ public class AssaultModel {
     private Player p;
     private Enemy e;
 
-    public AssaultModel(Player p, Enemy e) {
+    public OvoModel(Player p, Enemy e) {
         this.counter = 0;
         this.paused = false;
         this.p = p;

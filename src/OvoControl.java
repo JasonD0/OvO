@@ -11,11 +11,11 @@ import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
-public class AssaultControl extends JPanel implements Runnable, KeyListener {
+public class OvoControl extends JPanel implements Runnable, KeyListener {
     private Thread t;
     private boolean running;
-    private AssaultView av;
-    private AssaultModel am;
+    private OvoView av;
+    private OvoModel am;
     private Timer gameTimer;
     private Player p;
     private Enemy e;
@@ -24,15 +24,15 @@ public class AssaultControl extends JPanel implements Runnable, KeyListener {
     private PlayerControl pc;
     private EnemyControl ec;
     private List<Obstacle> obstacles;
-    private Assault game;
+    private Ovo game;
 
-    public AssaultControl(Assault game) {
+    public OvoControl(Ovo game) {
         this.game = game;
         this.p = new Player(100, am.PLATFORM_Y - 25, 25, 25, 0,0, 100, Color.BLACK);
         this.e = new Enemy(1300, am.PLATFORM_Y - 50, 50, 50, 0, 0, 100, Color.WHITE);
         this.playerAttack = new Attack();
-        this.am = new AssaultModel(p, e);
-        this.av = new AssaultView();
+        this.am = new OvoModel(p, e);
+        this.av = new OvoView();
         this.pc = new PlayerControl(p, playerAttack);
         this.eac = new EnemyAttackControl(e);
         this.ec = new EnemyControl(am, e, eac, av);

@@ -13,32 +13,32 @@ import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 
-public class AssaultView {
-    public void drawPlatform(AssaultControl parent) {
+public class OvoView {
+    public void drawPlatform(OvoControl parent) {
         JLabel platform = new JLabel();
-        platform.setBorder(BorderFactory.createMatteBorder(20, 0, 0, 0, AssaultModel.AQUA));
-        platform.setMaximumSize(new Dimension(AssaultModel.GAME_LENGTH, 20));
-        platform.setMinimumSize(new Dimension(AssaultModel.GAME_LENGTH, 20));
-        platform.setPreferredSize(new Dimension(AssaultModel.GAME_LENGTH,20));
-        platform.setBackground(AssaultModel.LIGHT_GRAY);
+        platform.setBorder(BorderFactory.createMatteBorder(20, 0, 0, 0, OvoModel.AQUA));
+        platform.setMaximumSize(new Dimension(OvoModel.GAME_LENGTH, 20));
+        platform.setMinimumSize(new Dimension(OvoModel.GAME_LENGTH, 20));
+        platform.setPreferredSize(new Dimension(OvoModel.GAME_LENGTH,20));
+        platform.setBackground(OvoModel.LIGHT_GRAY);
         parent.add(platform);
     }
 
     public void drawRestart(Graphics g) {
         Graphics2D g2d = (Graphics2D) g.create();
-        g2d.setColor(AssaultModel.AQUA);
+        g2d.setColor(OvoModel.AQUA);
         g2d.setFont(new Font(null, Font.BOLD, 25));
-        g2d.drawString("Press F to Restart", AssaultModel.GAME_LENGTH/2 - 110, AssaultModel.GAME_HEIGHT/2);
+        g2d.drawString("Press F to Restart", OvoModel.GAME_LENGTH/2 - 110, OvoModel.GAME_HEIGHT/2);
         g2d.dispose();
     }
 
-    public void drawInstructions(AssaultControl parent) {
+    public void drawInstructions(OvoControl parent) {
         JLabel instructions = new JLabel("", SwingConstants.CENTER);
         instructions.setFont(new Font(null, Font.BOLD, 20));
-        instructions.setMaximumSize(new Dimension(AssaultModel.GAME_LENGTH, 50));
-        instructions.setMinimumSize(new Dimension(AssaultModel.GAME_LENGTH, 50));
-        instructions.setPreferredSize(new Dimension(AssaultModel.GAME_LENGTH,50));
-        instructions.setBackground(AssaultModel.LIGHT_GRAY);
+        instructions.setMaximumSize(new Dimension(OvoModel.GAME_LENGTH, 50));
+        instructions.setMinimumSize(new Dimension(OvoModel.GAME_LENGTH, 50));
+        instructions.setPreferredSize(new Dimension(OvoModel.GAME_LENGTH,50));
+        instructions.setBackground(OvoModel.LIGHT_GRAY);
         String s = "<html><font color='rgb(127, 255, 212)'>LEFT/RIGHT:</font> MOVE #SPACE# " +
                 "         <font color='rgb(127, 255, 212)'>Z:</font> JUMP #SPACE# " +
                 "         <font color='rgb(127, 255, 212)'>X:</font> ATTACK #SPACE# " +
@@ -164,7 +164,7 @@ public class AssaultView {
     public void drawRectangularAttack(Graphics g, List<EnemyAttack> components) {
         for (EnemyAttack ea : components) {
             Graphics2D g2d = (Graphics2D) g.create();
-            g2d.setColor(AssaultModel.AQUA);
+            g2d.setColor(OvoModel.AQUA);
             g2d.rotate(Math.toRadians(ea.getAngle()), ea.getX(), ea.getY());
             g2d.fill(new Rectangle(ea.getX(), ea.getY(), ea.getWidth(), ea.getHeight()));
             g2d.dispose();

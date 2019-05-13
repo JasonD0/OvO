@@ -107,7 +107,7 @@ public class PlayerControl {
         enemyPos = (pos == null) ? enemyPos : pos;
         startPos = (pos == null) ? startPos : new Point(p.getXOrd(), p.getYOrd());
         // move player along a diagonal line
-        if (p.getYOrd() + p.getHeight() < AssaultModel.PLATFORM_Y)
+        if (p.getYOrd() + p.getHeight() < OvoModel.PLATFORM_Y)
             p.setYOrd(getLinearY(p.getXOrd(), (int) enemyPos.getX(), (int) enemyPos.getY()));
         // move player along a horizontal line
         if (p.getXOrd() >= enemyPos.getX()) p.setVelX(p.getMoveVel()*3);
@@ -146,7 +146,7 @@ public class PlayerControl {
      * Player begins falling
      */
     private void stopAtMaxJump() {
-        if (AssaultModel.PLATFORM_Y - p.getYOrd() < p.getMaxJump() || p.isDashing() || p.isKnockedUp()) return;
+        if (OvoModel.PLATFORM_Y - p.getYOrd() < p.getMaxJump() || p.isDashing() || p.isKnockedUp()) return;
         p.setVelY(p.getMoveVel());
         p.setFalling(true);
     }
@@ -156,8 +156,8 @@ public class PlayerControl {
      * Player stops on platform
      */
     private void stopOnPlatform() {
-        if (p.getYOrd() <= AssaultModel.PLATFORM_Y - p.getHeight()) return;
-        p.setYOrd(AssaultModel.PLATFORM_Y - p.getHeight());
+        if (p.getYOrd() <= OvoModel.PLATFORM_Y - p.getHeight()) return;
+        p.setYOrd(OvoModel.PLATFORM_Y - p.getHeight());
         p.setVelY(0);
         p.setFalling(false);
         p.setKnockedUp(false);
@@ -172,7 +172,7 @@ public class PlayerControl {
         if (p.getXOrd() > 0) return;
         p.setXOrd(1);
         p.setVelX(0);
-        if (p.getYOrd() + p.getHeight() < AssaultModel.PLATFORM_Y) p.setVelY(p.getMoveVel());
+        if (p.getYOrd() + p.getHeight() < OvoModel.PLATFORM_Y) p.setVelY(p.getMoveVel());
         p.setDashing(false);
         p.setKnockedBack(false);
     }
@@ -182,13 +182,13 @@ public class PlayerControl {
      * Player stops at right wall
      */
     private void stopAtRightWall() {
-        if (p.getXOrd() + p.getLength() < AssaultModel.GAME_LENGTH) return;
-        p.setXOrd(AssaultModel.GAME_LENGTH - p.getLength() - 1);
+        if (p.getXOrd() + p.getLength() < OvoModel.GAME_LENGTH) return;
+        p.setXOrd(OvoModel.GAME_LENGTH - p.getLength() - 1);
         p.setVelX(0);
         p.setDashing(false);
         p.setKnockedBack(false);
         // fall if player is not on the platform
-        if (p.getYOrd() + p.getHeight() < AssaultModel.PLATFORM_Y) p.setVelY(p.getMoveVel());
+        if (p.getYOrd() + p.getHeight() < OvoModel.PLATFORM_Y) p.setVelY(p.getMoveVel());
     }
 
     /**
@@ -201,7 +201,7 @@ public class PlayerControl {
         p.setVelX(0);
         p.setDashing(false);
         // let player fall if player dashed in the air
-        if (p.getYOrd() + p.getHeight() < AssaultModel.PLATFORM_Y) {
+        if (p.getYOrd() + p.getHeight() < OvoModel.PLATFORM_Y) {
             p.setFalling(true);
             p.setVelY(p.getMoveVel());
         }
@@ -211,7 +211,7 @@ public class PlayerControl {
      * Move the player in the right direction
      */
     private void moveRight() {
-        if (p.getXOrd() + p.getLength() >= AssaultModel.GAME_LENGTH - 1) return;
+        if (p.getXOrd() + p.getLength() >= OvoModel.GAME_LENGTH - 1) return;
         if (!isKeyPressed(KeyEvent.VK_RIGHT) || isKeyPressed(KeyEvent.VK_C)) return;
         p.setVelX(p.getMoveVel());
         if (!isKeyPressed(KeyEvent.VK_UP)) {
